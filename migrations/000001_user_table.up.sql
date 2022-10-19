@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS user (id string not null primary key, email string not null, password string not null, name string);
