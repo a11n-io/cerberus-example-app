@@ -33,13 +33,13 @@ func main() {
 	m, err := migrate.NewWithDatabaseInstance(
 		"file://migrations", "sqlite3", driver)
 	if err != nil {
-		log.Fatal(err)
-	}
-	if err := m.Up(); err != nil {
 		log.Println(err)
+	} else {
+		if err := m.Up(); err != nil {
+			log.Println(err)
+		}
+		log.Println("migration done")
 	}
-	log.Println("migration done")
-
 	publicRoutes := publicRoutes(
 		services.NewAuthService(repositories.NewAuthRepo(db), _env.JWT_SECRET, _env.SALT_ROUNDS),
 	)
