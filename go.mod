@@ -11,6 +11,7 @@ require (
 	github.com/joho/godotenv v1.4.0
 	github.com/mattn/go-sqlite3 v1.14.15
 	github.com/prinick96/elog v0.0.0-20220520175626-b729d74ceb5b
+	github.com/superkruger/go-cerberus v0.2.3
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 )
 
