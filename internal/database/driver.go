@@ -7,7 +7,7 @@ import (
 )
 
 func NewDB() (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", "./example.db")
+	db, err := sql.Open("sqlite3", "./dbdata/example.db")
 	if err != nil {
 		log.Fatal(err)
 		return nil, err

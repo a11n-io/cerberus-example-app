@@ -3,7 +3,6 @@ package services
 import (
 	"cerberus-example-app/internal/repositories"
 	"cerberus-example-app/internal/services/jwtutils"
-	"github.com/google/uuid"
 )
 
 type AuthService interface {
@@ -12,16 +11,22 @@ type AuthService interface {
 }
 
 type authService struct {
-	authRepo   repositories.AuthRepo
-	jwtSecret  string
-	saltRounds int
+	authRepo    repositories.AuthRepo
+	accountRepo repositories.AccountRepo
+	jwtSecret   string
+	saltRounds  int
 }
 
-func NewAuthService(authRepo repositories.AuthRepo, jwtSecret string, saltRounds int) AuthService {
+func NewAuthService(
+	authRepo repositories.AuthRepo,
+	accountRepo repositories.AccountRepo,
+	jwtSecret string,
+	saltRounds int) AuthService {
 	return &authService{
-		authRepo:   authRepo,
-		jwtSecret:  jwtSecret,
-		saltRounds: saltRounds,
+		authRepo:    authRepo,
+		accountRepo: accountRepo,
+		jwtSecret:   jwtSecret,
+		saltRounds:  saltRounds,
 	}
 }
 
@@ -31,8 +36,12 @@ func NewAuthService(authRepo repositories.AuthRepo, jwtSecret string, saltRounds
 // with the returned user.
 func (s *authService) Register(email, plainPassword, name string) (_ repositories.User, err error) {
 
-	userId := uuid.New().String()
-	user, err := s.authRepo.Save(userId, email, plainPassword, name)
+	account, err := s.accountRepo.Create()
+	if err != nil {
+		return repositories.User{}, err
+	}
+
+	user, err := s.authRepo.Save(account.Id, email, plainPassword, name)
 	if err != nil {
 		return repositories.User{}, err
 	}
@@ -65,17 +74,18 @@ func (s *authService) Login(email string, password string) (_ repositories.User,
 
 func userToClaims(user repositories.User) map[string]interface{} {
 	return map[string]interface{}{
-		"sub":    user.Email,
-		"userId": user.Id,
-		"name":   user.Name,
+		"sub":   user.Id,
+		"email": user.Email,
+		"name":  user.Name,
 	}
 }
 
 func userWithToken(user repositories.User, token string) repositories.User {
 	return repositories.User{
-		Token: token,
-		Id:    user.Id,
-		Email: user.Email,
-		Name:  user.Name,
+		Token:     token,
+		Id:        user.Id,
+		AccountId: user.AccountId,
+		Email:     user.Email,
+		Name:      user.Name,
 	}
 }

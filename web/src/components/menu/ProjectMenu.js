@@ -44,7 +44,7 @@ function Menu(props) {
             <p>{project.name}</p>
             <ul>
                 <li className="nav-item">
-                    <NavLink end to={`/apps/${project.id}/resourcetypes`}>Sprints</NavLink>
+                    <NavLink end to={`/projects/${project.id}/sprints`}>Sprints</NavLink>
                 </li>
             </ul>
         </div>

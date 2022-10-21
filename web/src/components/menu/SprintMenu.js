@@ -29,7 +29,7 @@ export default function SprintMenu(props) {
 
     return <>
         <div className="navmenu">
-            <Link to={`/projects/${project.id}/resourcetypes`}>{project.name} Sprints</Link>
+            <Link to={`/projects/${project.id}/sprints`}>{project.name} Sprints</Link>
             <p>{sprint.number}</p>
             <ul>
                 <li className="nav-item">

@@ -24,7 +24,7 @@ function SprintList() {
     const [showCreate, setShowCreate] = useState(false)
 
     useEffect(() => {
-        get("apps/"+projectCtx.project.id+"/sprints")
+        get("projects/"+projectCtx.project.id+"/sprints")
             .then(d => {
                 if (d) {
                     setSprints(d)
@@ -49,7 +49,7 @@ function SprintList() {
                 sprints.map(sprint => {
                     return (
                         <li className="nav-item" key={sprint.id}>
-                            <Link to={`${sprint.id}`}>{sprint.number}</Link>
+                            <Link to={`${sprint.id}`}>{sprint.sprintNumber}: {sprint.goal}</Link>
                         </li>
                     )
                 })
@@ -62,7 +62,7 @@ function SprintList() {
         {
             showCreate && <CreateSprint
                 sprints={sprints}
-                setResourceTypes={setSprints}
+                setSprints={setSprints}
                 setShowCreate={setShowCreate}/>
         }
 

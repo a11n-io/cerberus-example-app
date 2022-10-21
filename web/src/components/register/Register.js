@@ -9,11 +9,13 @@ export default function Register() {
     const navigate = useNavigate()
     const {post, loading} = useFetch("/")
     const [email, setEmail] = useState()
+    const [name, setName] = useState()
     const [password, setPassword] = useState()
 
     function handleRegister(e) {
         e.preventDefault()
         post("auth/register", {
+            name: name,
             email: email,
             password: password
         })
@@ -22,6 +24,10 @@ export default function Register() {
                 navigate("/login")
             })
             .catch(e => console.log(e))
+    }
+
+    function handleNameChanged(e) {
+        setName(e.target.value)
     }
 
     function handleEmailChanged(e) {
@@ -38,6 +44,7 @@ export default function Register() {
 
     return <>
         <form onSubmit={handleRegister}>
+            <Input required placeholder="Name" onChange={handleNameChanged}/>
             <Input required placeholder="Email" onChange={handleEmailChanged}/>
             <Input required placeholder="Password" type="password" onChange={handlePasswordChanged}/>
             <Button type="submit">Register</Button>

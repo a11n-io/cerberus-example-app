@@ -7,7 +7,7 @@ export default function Navbar() {
     const navigate = useNavigate()
 
     function handleLogout() {
-        auth.setJwtToken(null)
+        auth.setUser(null)
         navigate("/login")
     }
 
@@ -18,14 +18,22 @@ export default function Navbar() {
             </NavLink>
             <ul>
                 <AuthGuard>
-                    <li className="nav-item">
-                        <NavLink to="/projects">Projects</NavLink>
-                    </li>
-                    <li className="nav-item">
-                        <Link to="" onClick={handleLogout}>Logout</Link>
-                    </li>
+                    <NavLinks onLogoutClicked={handleLogout} auth={auth}/>
                 </AuthGuard>
             </ul>
         </nav>
+    </>
+}
+
+function NavLinks(props) {
+    const {onLogoutClicked, auth} = props
+
+    return <>
+        <li className="nav-item">
+            <NavLink to="/projects">Projects</NavLink>
+        </li>
+        <li className="nav-item">
+            <Link to="" onClick={onLogoutClicked}>Logout {auth.user.name}</Link>
+        </li>
     </>
 }

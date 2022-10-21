@@ -41,10 +41,12 @@ func main() {
 		log.Println("migration done")
 	}
 	publicRoutes := publicRoutes(
-		services.NewAuthService(repositories.NewAuthRepo(db), _env.JWT_SECRET, _env.SALT_ROUNDS),
+		services.NewAuthService(repositories.NewAuthRepo(db), repositories.NewAccountRepo(db), _env.JWT_SECRET, _env.SALT_ROUNDS),
 	)
 
-	privateRoutes := privateRoutes()
+	privateRoutes := privateRoutes(
+		services.NewProjectService(repositories.NewProjectRepo(db)),
+		services.NewSprintService(repositories.NewSprintRepo(db)))
 
 	// Run server with context
 	webserver := server.NewWebServer(ctx, _env.APP_PORT, _env.JWT_SECRET, publicRoutes, privateRoutes)
@@ -52,13 +54,17 @@ func main() {
 }
 
 func publicRoutes(
-	authService services.AuthService,
-) []routes.Routable {
+	authService services.AuthService) []routes.Routable {
 	return []routes.Routable{
 		routes.NewAuthRoutes(authService),
 	}
 }
 
-func privateRoutes() []routes.Routable {
-	return []routes.Routable{}
+func privateRoutes(
+	projectService services.ProjectService,
+	sprintService services.SprintService) []routes.Routable {
+	return []routes.Routable{
+		routes.NewProjectRoutes(projectService),
+		routes.NewSprintRoutes(sprintService),
+	}
 }

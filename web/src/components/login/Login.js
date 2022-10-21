@@ -24,8 +24,7 @@ export default function Login() {
             password: password
         }, {"Authorization": basicAuth})
             .then(r => {
-                auth.setJwtToken(r.token)
-                auth.setId(r.id)
+                auth.setUser(r)
                 navigate("/")
             })
             .catch(e => console.log(e))

@@ -15,7 +15,7 @@ export default function Project() {
         get("projects/"+params.id)
             .then(d => {
                 console.log(d);
-                projectCtx.setApp(d);
+                projectCtx.setProject(d);
             })
             .catch(e => console.log(e))
     }, [])

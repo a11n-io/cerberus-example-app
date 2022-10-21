@@ -12,7 +12,7 @@ export default function CreateSprint(props) {
 
     function handleFormSubmit(e) {
         e.preventDefault()
-        post("apps/"+projectCtx.project.id+"/sprints", {
+        post("projects/"+projectCtx.project.id+"/sprints", {
             goal: goal,
         })
             .then(r => {

@@ -4,14 +4,11 @@ import {useNavigate} from "react-router-dom";
 const AuthContext = createContext(null)
 
 function AuthProvider(props) {
-    const [jwtToken, setJwtToken] = useState(null)
-    const [id, setId] = useState()
+    const [user, setUser] = useState(null)
 
     const value = {
-        jwtToken: jwtToken,
-        setJwtToken: setJwtToken,
-        id: id,
-        setId: setId
+        user: user,
+        setUser: setUser,
     }
 
     return (
@@ -27,12 +24,12 @@ function AuthGuard(props) {
     const {redirectTo = "", ...rest} = props
 
     useEffect(() => {
-        if (redirectTo !== "" && !auth.jwtToken) {
+        if (redirectTo !== "" && !auth.user) {
             navigate(redirectTo)
         }
     }, [auth])
 
-    if (redirectTo !== "" && !auth.jwtToken) {
+    if (!auth.user) {
         return <></>
     } else {
 

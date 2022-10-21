@@ -15,9 +15,9 @@ export default function CreateProject() {
 
     function handleFormSubmit(e) {
         e.preventDefault()
-        post("users/"+auth.id+"/projects", {
+        post("accounts/"+auth.user.accountId+"/projects", {
             name: name,
-            domain: description
+            description: description
         })
             .then(r => {
                 if (r) {

@@ -90,6 +90,9 @@ func (s *webServer) JWTAuthRequired(c *gin.Context) {
 		return
 	}
 
+	// Set userId for route handlers
+	c.Set("userId", userId)
+
 	c.Next()
 }
 

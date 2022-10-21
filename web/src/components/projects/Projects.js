@@ -27,7 +27,7 @@ function ProjectList() {
     const [showCreate, setShowCreate] = useState(false)
 
     useEffect(() => {
-        get("users/"+auth.id+"/projects")
+        get("accounts/"+auth.user.accountId+"/projects")
             .then(d => setProjects(d))
             .catch(e => console.log(e))
     }, [])

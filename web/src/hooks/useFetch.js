@@ -12,8 +12,8 @@ export default function useFetch(baseUrl) {
     function get(url, headers) {
 
         let hdr = {...defaultHeaders, ...headers}
-        if (authCtx.jwtToken) {
-            hdr = {...hdr, "Authorization": "Bearer " + authCtx.jwtToken}
+        if (authCtx.user) {
+            hdr = {...hdr, "Authorization": "Bearer " + authCtx.user.token}
         }
 
         return new Promise((resolve, reject) => {
@@ -40,8 +40,8 @@ export default function useFetch(baseUrl) {
 
     function post(url, body, headers) {
         let hdr = {...defaultHeaders, ...headers}
-        if (authCtx.jwtToken) {
-            hdr = {...hdr, "Authorization": "Bearer " + authCtx.jwtToken}
+        if (authCtx.user) {
+            hdr = {...hdr, "Authorization": "Bearer " + authCtx.user.token}
         }
 
         return new Promise((resolve, reject) => {
@@ -69,8 +69,8 @@ export default function useFetch(baseUrl) {
 
     function put(url, body, headers) {
         let hdr = {...defaultHeaders, ...headers}
-        if (authCtx.jwtToken) {
-            hdr = {...hdr, "Authorization": "Bearer " + authCtx.jwtToken}
+        if (authCtx.user) {
+            hdr = {...hdr, "Authorization": "Bearer " + authCtx.user.token}
         }
 
         return new Promise((resolve, reject) => {
@@ -98,8 +98,8 @@ export default function useFetch(baseUrl) {
 
     function del(url, headers) {
         let hdr = {...defaultHeaders, ...headers}
-        if (authCtx.jwtToken) {
-            hdr = {...hdr, "Authorization": "Bearer " + authCtx.jwtToken}
+        if (authCtx.user) {
+            hdr = {...hdr, "Authorization": "Bearer " + authCtx.user.token}
         }
 
         return new Promise((resolve, reject) => {
