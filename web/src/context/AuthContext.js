@@ -5,11 +5,14 @@ import useFetch from "../hooks/useFetch";
 const AuthContext = createContext(null)
 
 function AuthProvider(props) {
-    const [user, setUser] = useState(null)
+    const [user, setUser] = useState()
+    const [cerberusToken, setCerberusToken] = useState()
 
     const value = {
         user: user,
         setUser: setUser,
+        cerberusToken: cerberusToken,
+        setCerberusToken: setCerberusToken
     }
 
     return (
@@ -31,7 +34,7 @@ function AuthGuard(props) {
         } else if (auth.user) {
             // get cerberus token
             get("cerberus/token")
-                .then(r => console.log("Cerberus token", r))
+                .then(r => auth.setCerberusToken(r))
                 .catch(e => console.log(e))
         }
     }, [auth])
