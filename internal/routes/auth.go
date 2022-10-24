@@ -18,7 +18,9 @@ type authRoutes struct {
 }
 
 func NewAuthRoutes(auth services.AuthService) Routable {
-	return &authRoutes{auth: auth}
+	return &authRoutes{
+		auth: auth,
+	}
 }
 
 func (r *authRoutes) RegisterRoutes(rg *gin.RouterGroup) {

@@ -7,6 +7,8 @@ import {ProjectProvider} from "./components/projects/ProjectContext";
 import Home from "./components/home/Home";
 import Projects from "./components/projects/Projects";
 import ProjectMenu from "./components/menu/ProjectMenu";
+import SettingsMenu from "./components/menu/SettingsMenu";
+import Settings from "./components/settings/Settings";
 
 function App() {
   return (
@@ -19,17 +21,17 @@ function App() {
               </div>
               <div className="grid-menu">
                   <AuthGuard>
-                      <ProjectProvider>
-                          <Routes>
-                              <Route path="/projects/:id/*" element={<ProjectMenu/>}/>
-                          </Routes>
-                      </ProjectProvider>
+                      <Routes>
+                          <Route path="/projects/:id/*" element={<ProjectProvider><ProjectMenu/></ProjectProvider>}/>
+                          <Route path="/settings/*" element={<SettingsMenu/>}/>
+                      </Routes>
                   </AuthGuard>
               </div>
               <div className="grid-main">
                   <main className="container">
                       <ProjectProvider>
                           <Routes>
+                              <Route path="/settings/*" element={<AuthGuard redirectTo="/login"><Settings/></AuthGuard>}/>
                               <Route path="/projects/*" element={<AuthGuard redirectTo="/login"><Projects/></AuthGuard>}/>
                               <Route exact path="/" element={<AuthGuard redirectTo="/login"><Home/></AuthGuard>}/>
                               <Route exact path="/login" element={<Login/>}/>

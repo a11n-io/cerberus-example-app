@@ -10,17 +10,20 @@ export default function useFetch(baseUrl) {
     }
 
     function get(url, headers) {
-
-        let hdr = {...defaultHeaders, ...headers}
+        let hdrs = defaultHeaders
         if (authCtx.user) {
-            hdr = {...hdr, "Authorization": "Bearer " + authCtx.user.token}
+            hdrs = {...hdrs, "Authorization": "Bearer " + authCtx.user.token}
         }
+        hdrs = {...hdrs, ...headers}
 
         return new Promise((resolve, reject) => {
             setLoading(true);
+
+            console.log("GET " + baseUrl + url, hdrs)
+
             fetch(baseUrl + url, {
                 method: "get",
-                headers: hdr
+                headers: hdrs
             })
                 .then(response => response.json())
                 .then(data => {
@@ -39,16 +42,17 @@ export default function useFetch(baseUrl) {
     }
 
     function post(url, body, headers) {
-        let hdr = {...defaultHeaders, ...headers}
+        let hdrs = defaultHeaders
         if (authCtx.user) {
-            hdr = {...hdr, "Authorization": "Bearer " + authCtx.user.token}
+            hdrs = {...hdrs, "Authorization": "Bearer " + authCtx.user.token}
         }
+        hdrs = {...hdrs, ...headers}
 
         return new Promise((resolve, reject) => {
             setLoading(true);
             fetch(baseUrl + url, {
                 method: "post",
-                headers: hdr,
+                headers: hdrs,
                 body: JSON.stringify(body)
             })
                 .then(response => response.json())
@@ -68,16 +72,17 @@ export default function useFetch(baseUrl) {
     }
 
     function put(url, body, headers) {
-        let hdr = {...defaultHeaders, ...headers}
+        let hdrs = defaultHeaders
         if (authCtx.user) {
-            hdr = {...hdr, "Authorization": "Bearer " + authCtx.user.token}
+            hdrs = {...hdrs, "Authorization": "Bearer " + authCtx.user.token}
         }
+        hdrs = {...hdrs, ...headers}
 
         return new Promise((resolve, reject) => {
             setLoading(true);
             fetch(baseUrl + url, {
                 method: "put",
-                headers: hdr,
+                headers: hdrs,
                 body: JSON.stringify(body)
             })
                 .then(response => response.json())
@@ -97,16 +102,17 @@ export default function useFetch(baseUrl) {
     }
 
     function del(url, headers) {
-        let hdr = {...defaultHeaders, ...headers}
+        let hdrs = defaultHeaders
         if (authCtx.user) {
-            hdr = {...hdr, "Authorization": "Bearer " + authCtx.user.token}
+            hdrs = {...hdrs, "Authorization": "Bearer " + authCtx.user.token}
         }
+        hdrs = {...hdrs, ...headers}
 
         return new Promise((resolve, reject) => {
             setLoading(true);
             fetch(baseUrl + url, {
                 method: "delete",
-                headers: hdr
+                headers: hdrs
             })
                 .then(response => response.json())
                 .then(data => {

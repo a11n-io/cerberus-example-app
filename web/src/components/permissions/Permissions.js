@@ -1,38 +1,52 @@
 import {useContext, useEffect, useState} from "react";
-import {AuthContext} from "../../context/AuthContext";
 import useFetch from "../../hooks/useFetch";
+import Button from "../../uikit/Button";
 
 export default function Permissions(props) {
-    const authCtx = useContext(AuthContext)
-    const {get, post, loading} = useFetch("localhost:8080/api") // cerberus
+    const {cerberusUrl, cerberusToken, accountId, resourceId} = props
+    const {get, post, loading} = useFetch(cerberusUrl)
     const [permissions, setPermissions] = useState([])
     const [users, setUsers] = useState([])
     const [roles, setRoles] = useState([])
+    const [policies, setPolicies] = useState([])
     const [permittee, setPermittee] = useState()
 
-    const {resourceId} = props
+    const headers = {
+        "CerberusAuthorization": "Bearer " + cerberusToken
+    }
 
     useEffect(() => {
-        if (authCtx.cerberusToken) {
-            get(`accounts/${authCtx.user.accountId}/resources/${resourceId}/permissions`, {
-                "Authorization": "Bearer " + authCtx.cerberusToken
-            })
-                .then(r => setPermissions(r))
+            get(`accounts/${accountId}/resources/${resourceId}/permissions`, headers)
+                .then(r => {
+                    console.log(r)
+                    if (r && r.data) {
+                    setPermissions(r.data)}
+                })
                 .catch(e => console.log(e))
 
-            get(`accounts/${authCtx.user.accountId}/users`, {
-                "Authorization": "Bearer " + authCtx.cerberusToken
-            })
-                .then(r => setUsers(r))
+            get(`accounts/${accountId}/users`, headers)
+                .then(r => {
+                    if (r && r.data) {
+                        setUsers(r.data)
+                    }
+                })
                 .catch(e => console.log(e))
 
-            get(`accounts/${authCtx.user.accountId}/roles`, {
-                "Authorization": "Bearer " + authCtx.cerberusToken
-            })
-                .then(r => setRoles(r))
+            get(`accounts/${accountId}/roles`, headers)
+                .then(r => {
+                    if (r && r.data) {
+                        setRoles(r.data)
+                    }
+                })
                 .catch(e => console.log(e))
 
-        }
+            get(`policies`, headers)
+                .then(r => {
+                    if (r && r.data) {
+                        setPolicies(r.data)
+                    }
+                })
+                .catch(e => console.log(e))
     }, [])
 
     function handlePermitteeChanged(e) {
@@ -46,6 +60,7 @@ export default function Permissions(props) {
                 <tr>
                     <th>Permittee</th>
                     <th>Policies</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -54,11 +69,30 @@ export default function Permissions(props) {
                     return (
                         <tr key={permission.id}>
                             <td>
-
+                                {permission.permittee.displayName}
                             </td>
                             <td>
+                                {
+                                    permission.policies.map(policy => {
+                                        return (
+                                            <span>{policy.name} x</span>
+                                        )
+                                    })
+                                }
+                                <span>
+                                    <select>
 
+                                            {
+                                                policies.map(policy => {
+                                                    return (
+                                                        <option key={policy.id} value={policy.id}>{policy.name}</option>
+                                                    )
+                                                })
+                                            }
+                                    </select>
+                                </span>
                             </td>
+                            <td><Button>Delete</Button></td>
                         </tr>
                     )
                 })
@@ -71,7 +105,7 @@ export default function Permissions(props) {
                             {
                                 roles.map(role => {
                                     return (
-                                        <option key={role.id} value={role.id}>{role.roleName}</option>
+                                        <option key={role.id} value={role.id}>{role.displayName}</option>
                                     )
                                 })
                             }

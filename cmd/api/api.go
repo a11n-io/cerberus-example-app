@@ -48,7 +48,8 @@ func main() {
 		log.Println("migration done")
 	}
 	publicRoutes := publicRoutes(
-		services.NewAuthService(repositories.NewAuthRepo(db), repositories.NewAccountRepo(db), _env.JWT_SECRET, _env.SALT_ROUNDS),
+		services.NewAuthService(repositories.NewAuthRepo(db), repositories.NewAccountRepo(db),
+			_env.JWT_SECRET, _env.SALT_ROUNDS, cerberusClient),
 	)
 
 	privateRoutes := privateRoutes(

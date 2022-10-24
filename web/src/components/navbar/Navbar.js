@@ -33,6 +33,9 @@ function NavLinks(props) {
             <NavLink to="/projects">Projects</NavLink>
         </li>
         <li className="nav-item">
+            <NavLink to="/settings">Settings</NavLink>
+        </li>
+        <li className="nav-item">
             <Link to="" onClick={onLogoutClicked}>Logout {auth.user.name}</Link>
         </li>
     </>

@@ -3,6 +3,10 @@ package services
 import (
 	"cerberus-example-app/internal/repositories"
 	"cerberus-example-app/internal/services/jwtutils"
+	"context"
+	"github.com/google/uuid"
+	cerberus "github.com/superkruger/go-cerberus"
+	"log"
 )
 
 type AuthService interface {
@@ -11,22 +15,25 @@ type AuthService interface {
 }
 
 type authService struct {
-	authRepo    repositories.AuthRepo
-	accountRepo repositories.AccountRepo
-	jwtSecret   string
-	saltRounds  int
+	authRepo       repositories.AuthRepo
+	accountRepo    repositories.AccountRepo
+	jwtSecret      string
+	saltRounds     int
+	cerberusClient cerberus.Client
 }
 
 func NewAuthService(
 	authRepo repositories.AuthRepo,
 	accountRepo repositories.AccountRepo,
 	jwtSecret string,
-	saltRounds int) AuthService {
+	saltRounds int,
+	cerberusClient cerberus.Client) AuthService {
 	return &authService{
-		authRepo:    authRepo,
-		accountRepo: accountRepo,
-		jwtSecret:   jwtSecret,
-		saltRounds:  saltRounds,
+		authRepo:       authRepo,
+		accountRepo:    accountRepo,
+		jwtSecret:      jwtSecret,
+		saltRounds:     saltRounds,
+		cerberusClient: cerberusClient,
 	}
 }
 
@@ -36,12 +43,53 @@ func NewAuthService(
 // with the returned user.
 func (s *authService) Register(email, plainPassword, name string) (_ repositories.User, err error) {
 
+	log.Println("Register", email, plainPassword, name)
+
 	account, err := s.accountRepo.Create()
 	if err != nil {
 		return repositories.User{}, err
 	}
 
 	user, err := s.authRepo.Save(account.Id, email, plainPassword, name)
+	if err != nil {
+		return repositories.User{}, err
+	}
+
+	// CERBERUS create account resource, user and role
+	log.Println("Creating Cerberus artifacts")
+	ctx := context.Background()
+	jwtToken, err := s.cerberusClient.GetToken(ctx)
+	if err != nil {
+		return repositories.User{}, err
+	}
+
+	_, err = s.cerberusClient.CreateAccount(ctx, jwtToken, account.Id)
+	if err != nil {
+		return repositories.User{}, err
+	}
+
+	_, err = s.cerberusClient.CreateResource(ctx, jwtToken, account.Id, account.Id, "Account")
+	if err != nil {
+		return repositories.User{}, err
+	}
+
+	_, err = s.cerberusClient.CreateUser(ctx, jwtToken, account.Id, user.Id, user.Email, user.Name)
+	if err != nil {
+		return repositories.User{}, err
+	}
+
+	roleId := uuid.New().String()
+	_, err = s.cerberusClient.CreateRole(ctx, jwtToken, account.Id, roleId, "AccountAdministrator")
+	if err != nil {
+		return repositories.User{}, err
+	}
+
+	err = s.cerberusClient.AssignRole(ctx, jwtToken, account.Id, roleId, user.Id)
+	if err != nil {
+		return repositories.User{}, err
+	}
+
+	err = s.cerberusClient.CreatePermission(ctx, jwtToken, account.Id, roleId, account.Id, []string{"ManageAccount"})
 	if err != nil {
 		return repositories.User{}, err
 	}
