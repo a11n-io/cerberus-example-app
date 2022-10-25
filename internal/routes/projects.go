@@ -30,7 +30,7 @@ func (r *projectRoutes) RegisterRoutes(rg *gin.RouterGroup) {
 func (r *projectRoutes) Create(c *gin.Context) {
 	userId, exists := c.Get("userId")
 	if !exists {
-		c.AbortWithError(401, fmt.Errorf("unauthorized"))
+		c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
 	}
 
 	log.Println("User:", userId)
@@ -39,12 +39,12 @@ func (r *projectRoutes) Create(c *gin.Context) {
 
 	accountId := c.Param("accountId")
 	if accountId == "" {
-		c.AbortWithError(400, fmt.Errorf("missing accountId"))
+		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("missing accountId")))
 		return
 	}
 
 	if err := c.Bind(&projectData); err != nil {
-		c.AbortWithError(400, err)
+		c.AbortWithStatusJSON(400, jsonError(err))
 		return
 	}
 
@@ -54,24 +54,24 @@ func (r *projectRoutes) Create(c *gin.Context) {
 		projectData.Description,
 	)
 	if err != nil {
-		c.AbortWithError(500, err)
+		c.AbortWithStatusJSON(500, jsonError(err))
 		return
 	}
 
-	c.JSON(http.StatusCreated, project)
+	c.JSON(http.StatusCreated, jsonData(project))
 }
 
 func (r *projectRoutes) FindAll(c *gin.Context) {
 	userId, exists := c.Get("userId")
 	if !exists {
-		c.AbortWithError(401, fmt.Errorf("unauthorized"))
+		c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
 	}
 
 	log.Println("User:", userId)
 
 	accountId := c.Param("accountId")
 	if accountId == "" {
-		c.AbortWithError(400, fmt.Errorf("missing accountId"))
+		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("missing accountId")))
 		return
 	}
 
@@ -79,24 +79,24 @@ func (r *projectRoutes) FindAll(c *gin.Context) {
 		accountId,
 	)
 	if err != nil {
-		c.AbortWithError(500, err)
+		c.AbortWithStatusJSON(500, jsonError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, projects)
+	c.JSON(http.StatusOK, jsonData(projects))
 }
 
 func (r *projectRoutes) Get(c *gin.Context) {
 	userId, exists := c.Get("userId")
 	if !exists {
-		c.AbortWithError(401, fmt.Errorf("unauthorized"))
+		c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
 	}
 
 	log.Println("User:", userId)
 
 	projectId := c.Param("projectId")
 	if projectId == "" {
-		c.AbortWithError(400, fmt.Errorf("missing projectId"))
+		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("missing projectId")))
 		return
 	}
 
@@ -104,9 +104,9 @@ func (r *projectRoutes) Get(c *gin.Context) {
 		projectId,
 	)
 	if err != nil {
-		c.AbortWithError(500, err)
+		c.AbortWithStatusJSON(500, jsonError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, project)
+	c.JSON(http.StatusOK, jsonData(project))
 }

@@ -27,12 +27,11 @@ export default function useFetch(baseUrl) {
             })
                 .then(response => response.json())
                 .then(data => {
-                    if (!data) {
-                        setLoading(false);
+                    setLoading(false);
+                    if (!data || !data.data) {
                         return reject(data);
                     }
-                    setLoading(false);
-                    resolve(data);
+                    resolve(data.data);
                 })
                 .catch(error => {
                     setLoading(false);
@@ -57,12 +56,11 @@ export default function useFetch(baseUrl) {
             })
                 .then(response => response.json())
                 .then(data => {
-                    if (!data) {
-                        setLoading(false);
+                    setLoading(false);
+                    if (!data || !data.data) {
                         return reject(data);
                     }
-                    setLoading(false);
-                    resolve(data);
+                    resolve(data.data);
                 })
                 .catch(error => {
                     setLoading(false);
@@ -87,12 +85,11 @@ export default function useFetch(baseUrl) {
             })
                 .then(response => response.json())
                 .then(data => {
-                    if (!data) {
-                        setLoading(false);
+                    setLoading(false);
+                    if (!data || !data.data) {
                         return reject(data);
                     }
-                    setLoading(false);
-                    resolve(data);
+                    resolve(data.data);
                 })
                 .catch(error => {
                     setLoading(false);
@@ -116,12 +113,11 @@ export default function useFetch(baseUrl) {
             })
                 .then(response => response.json())
                 .then(data => {
-                    if (!data) {
-                        setLoading(false);
+                    setLoading(false);
+                    if (!data || !data.data) {
                         return reject(data);
                     }
-                    setLoading(false);
-                    resolve(data);
+                    resolve(data.data);
                 })
                 .catch(error => {
                     setLoading(false);

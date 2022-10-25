@@ -31,7 +31,7 @@ func (r *sprintRoutes) RegisterRoutes(rg *gin.RouterGroup) {
 func (r *sprintRoutes) Create(c *gin.Context) {
 	userId, exists := c.Get("userId")
 	if !exists {
-		c.AbortWithError(401, fmt.Errorf("unauthorized"))
+		c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
 	}
 
 	log.Println("User:", userId)
@@ -40,12 +40,12 @@ func (r *sprintRoutes) Create(c *gin.Context) {
 
 	projectId := c.Param("projectId")
 	if projectId == "" {
-		c.AbortWithError(400, fmt.Errorf("missing projectId"))
+		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("missing projectId")))
 		return
 	}
 
 	if err := c.Bind(&resourceTypeData); err != nil {
-		c.AbortWithError(400, err)
+		c.AbortWithStatusJSON(400, jsonError(err))
 		return
 	}
 
@@ -54,24 +54,24 @@ func (r *sprintRoutes) Create(c *gin.Context) {
 		resourceTypeData.Goal,
 	)
 	if err != nil {
-		c.AbortWithError(500, err)
+		c.AbortWithStatusJSON(500, jsonError(err))
 		return
 	}
 
-	c.JSON(http.StatusCreated, sprint)
+	c.JSON(http.StatusCreated, jsonData(sprint))
 }
 
 func (r *sprintRoutes) FindByProject(c *gin.Context) {
 	userId, exists := c.Get("userId")
 	if !exists {
-		c.AbortWithError(401, fmt.Errorf("unauthorized"))
+		c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
 	}
 
 	log.Println("User:", userId)
 
 	projectId := c.Param("projectId")
 	if projectId == "" {
-		c.AbortWithError(400, fmt.Errorf("missing projectId"))
+		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("missing projectId")))
 		return
 	}
 
@@ -79,24 +79,24 @@ func (r *sprintRoutes) FindByProject(c *gin.Context) {
 		projectId,
 	)
 	if err != nil {
-		c.AbortWithError(500, err)
+		c.AbortWithStatusJSON(500, jsonError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, sprints)
+	c.JSON(http.StatusOK, jsonData(sprints))
 }
 
 func (r *sprintRoutes) Start(c *gin.Context) {
 	userId, exists := c.Get("userId")
 	if !exists {
-		c.AbortWithError(401, fmt.Errorf("unauthorized"))
+		c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
 	}
 
 	log.Println("User:", userId)
 
 	sprintId := c.Param("sprintId")
 	if sprintId == "" {
-		c.AbortWithError(400, fmt.Errorf("missing sprintId"))
+		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("missing sprintId")))
 		return
 	}
 
@@ -104,24 +104,24 @@ func (r *sprintRoutes) Start(c *gin.Context) {
 		sprintId,
 	)
 	if err != nil {
-		c.AbortWithError(500, err)
+		c.AbortWithStatusJSON(500, jsonError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, rts)
+	c.JSON(http.StatusOK, jsonData(rts))
 }
 
 func (r *sprintRoutes) End(c *gin.Context) {
 	userId, exists := c.Get("userId")
 	if !exists {
-		c.AbortWithError(401, fmt.Errorf("unauthorized"))
+		c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
 	}
 
 	log.Println("User:", userId)
 
 	sprintId := c.Param("sprintId")
 	if sprintId == "" {
-		c.AbortWithError(400, fmt.Errorf("missing sprintId"))
+		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("missing sprintId")))
 		return
 	}
 
@@ -129,24 +129,24 @@ func (r *sprintRoutes) End(c *gin.Context) {
 		sprintId,
 	)
 	if err != nil {
-		c.AbortWithError(500, err)
+		c.AbortWithStatusJSON(500, jsonError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, rts)
+	c.JSON(http.StatusOK, jsonData(rts))
 }
 
 func (r *sprintRoutes) Get(c *gin.Context) {
 	userId, exists := c.Get("userId")
 	if !exists {
-		c.AbortWithError(401, fmt.Errorf("unauthorized"))
+		c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
 	}
 
 	log.Println("User:", userId)
 
 	sprintId := c.Param("sprintId")
 	if sprintId == "" {
-		c.AbortWithError(400, fmt.Errorf("missing sprintId"))
+		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("missing sprintId")))
 		return
 	}
 
@@ -154,9 +154,9 @@ func (r *sprintRoutes) Get(c *gin.Context) {
 		sprintId,
 	)
 	if err != nil {
-		c.AbortWithError(500, err)
+		c.AbortWithStatusJSON(500, jsonError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, sprint)
+	c.JSON(http.StatusOK, jsonData(sprint))
 }

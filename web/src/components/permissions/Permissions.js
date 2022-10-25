@@ -1,15 +1,17 @@
 import {useContext, useEffect, useState} from "react";
 import useFetch from "../../hooks/useFetch";
 import Button from "../../uikit/Button";
+import Loader from "../../uikit/Loader";
 
 export default function Permissions(props) {
     const {cerberusUrl, cerberusToken, accountId, resourceId} = props
-    const {get, post, loading} = useFetch(cerberusUrl)
+    const {get, post, del, loading} = useFetch(cerberusUrl)
     const [permissions, setPermissions] = useState([])
     const [users, setUsers] = useState([])
     const [roles, setRoles] = useState([])
     const [policies, setPolicies] = useState([])
-    const [permittee, setPermittee] = useState()
+    const [newPermittee, setNewPermittee] = useState()
+    const [newPolicies, setNewPolicies] = useState([])
 
     const headers = {
         "CerberusAuthorization": "Bearer " + cerberusToken
@@ -18,39 +20,128 @@ export default function Permissions(props) {
     useEffect(() => {
             get(`accounts/${accountId}/resources/${resourceId}/permissions`, headers)
                 .then(r => {
-                    console.log(r)
-                    if (r && r.data) {
-                    setPermissions(r.data)}
+                    if (r) {
+                        setPermissions(r)
+                    }
                 })
                 .catch(e => console.log(e))
 
             get(`accounts/${accountId}/users`, headers)
                 .then(r => {
-                    if (r && r.data) {
-                        setUsers(r.data)
+                    if (r) {
+                        setUsers(r)
                     }
                 })
                 .catch(e => console.log(e))
 
             get(`accounts/${accountId}/roles`, headers)
                 .then(r => {
-                    if (r && r.data) {
-                        setRoles(r.data)
+                    if (r) {
+                        setRoles(r)
                     }
                 })
                 .catch(e => console.log(e))
 
-            get(`policies`, headers)
+            get(`accounts/${accountId}/resources/${resourceId}/policies`, headers)
                 .then(r => {
-                    if (r && r.data) {
-                        setPolicies(r.data)
+                    if (r) {
+                        setPolicies(r)
                     }
                 })
                 .catch(e => console.log(e))
     }, [])
 
-    function handlePermitteeChanged(e) {
+    function handlePolicyRemoveClicked(e) {
+        const permissionId = e.target.getAttribute("data-val1")
+        const policyId = e.target.getAttribute("data-val2")
 
+        if (!permissionId || !policyId) {
+            return
+        }
+
+        del(`accounts/${accountId}/permissions/${permissionId}/policies/${policyId}`, headers)
+            .then(r => {
+                setPermissions(prev => [...prev.filter(p => p.id !== permissionId), r])
+            })
+            .catch(e => console.log(e))
+    }
+
+    function handlePolicySelected(e) {
+        const permissionId = e.target.getAttribute("data-val1")
+        const policyId = e.target.value
+        if (!permissionId || !policyId) {
+            return
+        }
+
+        post(`accounts/${accountId}/permissions/${permissionId}/policies/${policyId}`, headers)
+            .then(r => {
+                let permission = permissions.find(p => p.id === permissionId)
+                let policy = policies.find(p => p.id === policyId)
+
+                if (permission && policy) {
+                    permission.policies = [...permission.policies, policy]
+                    setPermissions(prev => [...prev.filter(p => p.id !== permissionId), permission])
+                }
+            })
+            .catch(e => console.log(e))
+    }
+
+    function handlePermissionRemoveClicked(e) {
+        const permissionId = e.target.getAttribute("data-val1")
+        if (!permissionId) {
+            return
+        }
+
+        del(`accounts/${accountId}/permissions/${permissionId}`, headers)
+            .then(r => {
+                setPermissions(prev => prev.filter(perm => perm.id !== permissionId))
+            })
+            .catch(e => console.log(e))
+    }
+
+    function handlePermissionAddClicked(e) {
+        if (!newPermittee || newPolicies.length === 0) {
+            return
+        }
+
+        post(`accounts/${accountId}/permissions`, {
+            permitteeId: newPermittee,
+            resourceId: resourceId,
+            policyIds: newPolicies.map(p => p.id)
+        }, headers)
+            .then(r => setPermissions(prev => [...prev, r]))
+            .catch(e => console.log(e))
+            .finally(() => {
+                setNewPermittee(null)
+                setNewPolicies([])
+            })
+    }
+
+    function handleNewPermitteeSelected(e) {
+        setNewPermittee(e.target.value)
+    }
+
+    function handleNewPolicySelected(e) {
+        const newPolicyId = e.target.value
+        if (!newPolicies.find(p => p.id === newPolicyId)) {
+            const policy = policies.find(p => p.id === newPolicyId)
+            if (policy) {
+                setNewPolicies(prev => [...prev, policy])
+            }
+        }
+    }
+
+    function handleNewPolicyRemoveClicked(e) {
+        const policyId = e.target.getAttribute("data-val1")
+        if (!policyId) {
+            return
+        }
+
+        setNewPolicies(prev => prev.filter(p => p.id !== policyId))
+    }
+
+    if (loading) {
+        return <Loader/>
     }
 
     return <>
@@ -75,32 +166,36 @@ export default function Permissions(props) {
                                 {
                                     permission.policies.map(policy => {
                                         return (
-                                            <span>{policy.name} x</span>
+                                            <span key={policy.id}>{policy.name}
+                                                <Button outline accent data-val1={permission.id} data-val2={policy.id}
+                                                onClick={handlePolicyRemoveClicked}>x</Button></span>
                                         )
                                     })
                                 }
                                 <span>
-                                    <select>
-
-                                            {
-                                                policies.map(policy => {
-                                                    return (
-                                                        <option key={policy.id} value={policy.id}>{policy.name}</option>
-                                                    )
-                                                })
-                                            }
+                                    <select onChange={handlePolicySelected}
+                                            data-val1={permission.id}>
+                                        <option value="">Select Policy</option>
+                                        {
+                                            policies.map(policy => {
+                                                return (
+                                                    <option key={policy.id} value={policy.id}>{policy.name}</option>
+                                                )
+                                            })
+                                        }
                                     </select>
                                 </span>
                             </td>
-                            <td><Button>Delete</Button></td>
+                            <td><Button onClick={handlePermissionRemoveClicked} data-val1={permission.id}>Remove</Button></td>
                         </tr>
                     )
                 })
             }
             <tr>
                 <td>
-                    <label htmlFor="permittees">Choose a permittee:</label>
-                    <select id="permittees" onChange={handlePermitteeChanged}>
+                    <label htmlFor="permittees">Permittee:</label>
+                    <select id="permittees" onChange={handleNewPermitteeSelected}>
+                        <option value="">Select Role or User</option>
                         <optgroup label="Roles">
                             {
                                 roles.map(role => {
@@ -123,11 +218,30 @@ export default function Permissions(props) {
                 </td>
                 <td>
                     {
-                        permittee &&
-                        <>
-                        </>
+                        newPolicies.map(policy => {
+                            return (
+                                <span key={policy.id}>{policy.name}
+                                    <Button outline accent data-val1={policy.id}
+                                            onClick={handleNewPolicyRemoveClicked}>x</Button></span>
+                            )
+                        })
                     }
+                    <span>
+                        <select onChange={handleNewPolicySelected}>
+                            <option value="">Select Policy</option>
+                            {
+                                policies.map(policy => {
+                                    return (
+                                        <option key={policy.id} value={policy.id}>{policy.name}</option>
+                                    )
+                                })
+                            }
+                        </select>
+                    </span>
                 </td>
+                <td><Button
+                    disabled={!newPermittee || newPolicies.length === 0}
+                    onClick={handlePermissionAddClicked}>Add</Button></td>
             </tr>
             </tbody>
         </table>

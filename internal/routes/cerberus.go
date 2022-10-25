@@ -28,7 +28,7 @@ func (r *cerberusRoutes) RegisterRoutes(rg *gin.RouterGroup) {
 func (r *cerberusRoutes) GetToken(c *gin.Context) {
 	userId, exists := c.Get("userId")
 	if !exists {
-		c.AbortWithError(401, fmt.Errorf("unauthorized"))
+		c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
 	}
 
 	log.Println("User:", userId)
@@ -36,9 +36,9 @@ func (r *cerberusRoutes) GetToken(c *gin.Context) {
 	token, err := r.client.GetToken(c.Copy())
 
 	if err != nil {
-		c.AbortWithError(500, err)
+		c.AbortWithStatusJSON(500, jsonError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, token)
+	c.JSON(http.StatusOK, jsonData(token))
 }

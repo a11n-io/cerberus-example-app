@@ -32,7 +32,7 @@ func (r *authRoutes) Register(c *gin.Context) {
 	var authData AuthData
 
 	if err := c.Bind(&authData); err != nil {
-		c.AbortWithError(400, err)
+		c.AbortWithStatusJSON(400, jsonError(err))
 		return
 	}
 
@@ -42,17 +42,17 @@ func (r *authRoutes) Register(c *gin.Context) {
 		authData.Name,
 	)
 	if err != nil {
-		c.AbortWithError(500, err)
+		c.AbortWithStatusJSON(500, jsonError(err))
 		return
 	}
 
-	c.JSON(http.StatusCreated, user)
+	c.JSON(http.StatusCreated, jsonData(user))
 }
 
 func (r *authRoutes) Login(c *gin.Context) {
 	email, password, ok := c.Request.BasicAuth()
 	if !ok {
-		c.AbortWithError(400, fmt.Errorf("invalid credentials"))
+		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("invalid credentials")))
 	}
 
 	user, err := r.auth.Login(
@@ -60,9 +60,9 @@ func (r *authRoutes) Login(c *gin.Context) {
 		password,
 	)
 	if err != nil {
-		c.AbortWithError(400, err)
+		c.AbortWithStatusJSON(400, jsonError(err))
 		return
 	}
 
-	c.JSON(http.StatusCreated, user)
+	c.JSON(http.StatusCreated, jsonData(user))
 }
