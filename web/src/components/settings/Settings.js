@@ -10,7 +10,7 @@ export default function Settings() {
         <Routes>
             <Route exact path="permissions" element={<Permissions
                 cerberusUrl={"http://localhost:8000/api/"}
-                cerberusToken={authCtx.cerberusToken}
+                cerberusToken={authCtx.user.cerberusToken}
                 accountId={authCtx.user.accountId}
                 resourceId={authCtx.user.accountId}
             />}/>

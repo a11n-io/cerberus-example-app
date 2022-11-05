@@ -50,6 +50,7 @@ func (r *sprintRoutes) Create(c *gin.Context) {
 	}
 
 	sprint, err := r.service.Create(
+		c,
 		projectId,
 		resourceTypeData.Goal,
 	)
@@ -76,6 +77,7 @@ func (r *sprintRoutes) FindByProject(c *gin.Context) {
 	}
 
 	sprints, err := r.service.FindByProject(
+		c,
 		projectId,
 	)
 	if err != nil {
@@ -101,6 +103,7 @@ func (r *sprintRoutes) Start(c *gin.Context) {
 	}
 
 	rts, err := r.service.Start(
+		c,
 		sprintId,
 	)
 	if err != nil {
@@ -126,6 +129,7 @@ func (r *sprintRoutes) End(c *gin.Context) {
 	}
 
 	rts, err := r.service.End(
+		c,
 		sprintId,
 	)
 	if err != nil {
@@ -151,6 +155,7 @@ func (r *sprintRoutes) Get(c *gin.Context) {
 	}
 
 	sprint, err := r.service.Get(
+		c,
 		sprintId,
 	)
 	if err != nil {

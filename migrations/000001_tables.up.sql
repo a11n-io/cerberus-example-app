@@ -15,3 +15,10 @@ CREATE TABLE IF NOT EXISTS sprint (id string not null primary key, project_id st
     FOREIGN KEY (project_id) REFERENCES project (id)
         ON UPDATE CASCADE
         ON DELETE CASCADE);
+CREATE TABLE IF NOT EXISTS story (id string not null primary key, sprint_id string not null,
+                                   estimation int not null, description string not null,
+                                   status string not null, user_id string,
+                                   FOREIGN KEY (sprint_id) REFERENCES sprint (id),
+                                   FOREIGN KEY (user_id) REFERENCES user (id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE);

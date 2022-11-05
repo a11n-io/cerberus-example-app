@@ -2,32 +2,45 @@ package services
 
 import (
 	"cerberus-example-app/internal/repositories"
+	"context"
+	cerberus "github.com/a11n-io/go-cerberus"
 )
 
 type ProjectService interface {
-	Create(accountId, name, description string) (repositories.Project, error)
-	FindAll(accountId string) ([]repositories.Project, error)
-	Get(projectId string) (repositories.Project, error)
+	Create(ctx context.Context, accountId, name, description string) (repositories.Project, error)
+	FindAll(ctx context.Context, accountId string) ([]repositories.Project, error)
+	Get(ctx context.Context, projectId string) (repositories.Project, error)
 }
 
 type projectService struct {
-	repo repositories.ProjectRepo
+	repo           repositories.ProjectRepo
+	cerberusClient cerberus.Client
 }
 
-func NewProjectService(repo repositories.ProjectRepo) ProjectService {
+func NewProjectService(
+	repo repositories.ProjectRepo,
+	cerberusClient cerberus.Client) ProjectService {
 	return &projectService{
-		repo: repo,
+		repo:           repo,
+		cerberusClient: cerberusClient,
 	}
 }
 
-func (s *projectService) Create(accountId, name, description string) (repositories.Project, error) {
-	return s.repo.Create(accountId, name, description)
+func (s *projectService) Create(ctx context.Context, accountId, name, description string) (repositories.Project, error) {
+	project, err := s.repo.Create(accountId, name, description)
+
+	_, err = s.cerberusClient.CreateResource(ctx, accountId, project.Id, accountId, "Project")
+	if err != nil {
+		return repositories.Project{}, err
+	}
+
+	return project, nil
 }
 
-func (s *projectService) FindAll(accountId string) ([]repositories.Project, error) {
+func (s *projectService) FindAll(ctx context.Context, accountId string) ([]repositories.Project, error) {
 	return s.repo.FindByAccount(accountId)
 }
 
-func (s *projectService) Get(projectId string) (repositories.Project, error) {
+func (s *projectService) Get(ctx context.Context, projectId string) (repositories.Project, error) {
 	return s.repo.Get(projectId)
 }

@@ -74,7 +74,9 @@ func (r *sprintRepo) Create(projectId, goal string) (sprint Sprint, err error) {
 
 func (r *sprintRepo) FindByProject(projectId string) (sprints []Sprint, err error) {
 
-	stmt, err := r.db.Prepare("select id, sprint_number, goal, start_date, end_date from sprint where project_id = ?")
+	stmt, err := r.db.Prepare(
+		"select id, sprint_number, goal, start_date, end_date from sprint " +
+			"where project_id = ? order by sprint_number asc")
 	if err != nil {
 		log.Println(err)
 		return

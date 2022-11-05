@@ -3,7 +3,7 @@ import {ProjectContext} from "../ProjectContext";
 import useFetch from "../../../hooks/useFetch";
 import Loader from "../../../uikit/Loader";
 import Input from "../../../uikit/Input";
-import Button from "../../../uikit/Button";
+import Btn from "../../../uikit/Btn";
 
 export default function CreateSprint(props) {
     const projectCtx = useContext(ProjectContext)
@@ -35,7 +35,7 @@ export default function CreateSprint(props) {
     return <>
         <form onSubmit={handleFormSubmit}>
             <Input required placeholder="Goal" onChange={handleGoalChanged}/>
-            <Button type="submit">Create</Button>
+            <Btn type="submit">Create</Btn>
         </form>
     </>
 }

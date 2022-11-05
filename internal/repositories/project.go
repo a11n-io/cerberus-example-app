@@ -67,7 +67,7 @@ func (r *projectRepo) Create(accountId, name, description string) (project Proje
 
 func (r *projectRepo) FindByAccount(accountId string) (projects []Project, err error) {
 
-	stmt, err := r.db.Prepare("select id, name, description from project where account_id = ?")
+	stmt, err := r.db.Prepare("select id, name, description from project where account_id = ? order by name asc")
 	if err != nil {
 		log.Println(err)
 		return

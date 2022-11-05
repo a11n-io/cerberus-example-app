@@ -49,6 +49,7 @@ func (r *projectRoutes) Create(c *gin.Context) {
 	}
 
 	project, err := r.service.Create(
+		c,
 		accountId,
 		projectData.Name,
 		projectData.Description,
@@ -76,6 +77,7 @@ func (r *projectRoutes) FindAll(c *gin.Context) {
 	}
 
 	projects, err := r.service.FindAll(
+		c,
 		accountId,
 	)
 	if err != nil {
@@ -101,6 +103,7 @@ func (r *projectRoutes) Get(c *gin.Context) {
 	}
 
 	project, err := r.service.Get(
+		c,
 		projectId,
 	)
 	if err != nil {

@@ -84,35 +84,69 @@ func (s *webServer) JWTAuthRequired(c *gin.Context) {
 		return
 	}
 
-	userId, err := s.extractSubject(token)
-	if err != nil || userId == "" {
+	userId, accountId, cerberusToken, err := s.extractSubjectAndToken(token)
+	if err != nil || userId == "" || accountId == "" || cerberusToken == "" {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
 
-	// Set userId for route handlers
+	// Set userId and cerberusToken for route handlers
 	c.Set("userId", userId)
+	c.Set("accountId", accountId)
+	c.Set("cerberusToken", cerberusToken)
 
 	c.Next()
 }
 
-func (s *webServer) extractSubject(bearer string) (string, error) {
+func (s *webServer) extractSubjectAndToken(bearer string) (string, string, string, error) {
 	if bearer == "" {
-		return "", nil
+		return "", "", "", nil
 	}
 	subject, err := jwtutils.ExtractToken(bearer, s.jwtSecret, func(token *jwt.Token) interface{} {
 		claims := token.Claims.(jwt.MapClaims)
 		return claims["sub"]
 	})
 	if err != nil {
-		return "", err
+		return "", "", "", err
 	}
 
 	if subject == nil {
-		return "", fmt.Errorf("empty subject in claims")
+		return "", "", "", fmt.Errorf("empty subject in claims")
 	}
 
-	return subject.(string), nil
+	accountId, err := jwtutils.ExtractToken(bearer, s.jwtSecret, func(token *jwt.Token) interface{} {
+		claims := token.Claims.(jwt.MapClaims)
+		extraClaims, ok := claims[subject.(string)].(map[string]interface{})
+		if !ok {
+			return nil
+		}
+		return extraClaims["accountId"]
+	})
+	if err != nil {
+		return "", "", "", err
+	}
+
+	if accountId == nil {
+		return "", "", "", fmt.Errorf("empty accountId in extra claims")
+	}
+
+	cerberusToken, err := jwtutils.ExtractToken(bearer, s.jwtSecret, func(token *jwt.Token) interface{} {
+		claims := token.Claims.(jwt.MapClaims)
+		extraClaims, ok := claims[subject.(string)].(map[string]interface{})
+		if !ok {
+			return nil
+		}
+		return extraClaims["cerberusToken"]
+	})
+	if err != nil {
+		return "", "", "", err
+	}
+
+	if cerberusToken == nil {
+		return "", "", "", fmt.Errorf("empty cerberusToken in extra claims")
+	}
+
+	return subject.(string), accountId.(string), cerberusToken.(string), nil
 }
 
 func applyCors(r *gin.Engine) {

@@ -10,10 +10,10 @@ import (
 	"cerberus-example-app/internal/utils"
 	"context"
 	"fmt"
+	cerberus "github.com/a11n-io/go-cerberus"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/sqlite3"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	cerberus "github.com/superkruger/go-cerberus"
 	"log"
 )
 
@@ -47,16 +47,21 @@ func main() {
 		}
 		log.Println("migration done")
 	}
-	publicRoutes := publicRoutes(
-		services.NewAuthService(repositories.NewAuthRepo(db), repositories.NewAccountRepo(db),
-			_env.JWT_SECRET, _env.SALT_ROUNDS, cerberusClient),
-	)
+
+	userService := services.NewUserService(
+		repositories.NewUserRepo(db),
+		repositories.NewAccountRepo(db),
+		_env.JWT_SECRET, _env.SALT_ROUNDS, cerberusClient)
+
+	publicRoutes := publicRoutes(userService)
 
 	privateRoutes := privateRoutes(
 		_env,
 		cerberusClient,
-		services.NewProjectService(repositories.NewProjectRepo(db)),
-		services.NewSprintService(repositories.NewSprintRepo(db)))
+		userService,
+		services.NewProjectService(repositories.NewProjectRepo(db), cerberusClient),
+		services.NewSprintService(repositories.NewSprintRepo(db), cerberusClient),
+		services.NewStoryService(repositories.NewStoryRepo(db), cerberusClient))
 
 	// Run server with context
 	webserver := server.NewWebServer(ctx, _env.APP_PORT, _env.JWT_SECRET, publicRoutes, privateRoutes)
@@ -64,7 +69,7 @@ func main() {
 }
 
 func publicRoutes(
-	authService services.AuthService) []routes.Routable {
+	authService services.UserService) []routes.Routable {
 	return []routes.Routable{
 		routes.NewAuthRoutes(authService),
 	}
@@ -73,11 +78,15 @@ func publicRoutes(
 func privateRoutes(
 	env env.EnvApp,
 	cerberusClient cerberus.Client,
+	userService services.UserService,
 	projectService services.ProjectService,
-	sprintService services.SprintService) []routes.Routable {
+	sprintService services.SprintService,
+	storyService services.StoryService) []routes.Routable {
 	return []routes.Routable{
 		routes.NewCerberusRoutes(env, cerberusClient),
+		routes.NewUserRoutes(userService),
 		routes.NewProjectRoutes(projectService),
 		routes.NewSprintRoutes(sprintService),
+		routes.NewStoryRoutes(storyService),
 	}
 }

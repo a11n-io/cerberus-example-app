@@ -4,7 +4,7 @@ import {useNavigate} from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
 import Loader from "../../uikit/Loader";
 import Input from "../../uikit/Input";
-import Button from "../../uikit/Button";
+import Btn from "../../uikit/Btn";
 
 export default function CreateProject() {
     const auth = useContext(AuthContext)
@@ -43,7 +43,7 @@ export default function CreateProject() {
         <form onSubmit={handleFormSubmit}>
             <Input required placeholder="Name" onChange={handleNameChanged}/>
             <Input required placeholder="Description" onChange={handleDescriptionChanged}/>
-            <Button type="submit">Create</Button>
+            <Btn type="submit">Create</Btn>
         </form>
     </>
 }

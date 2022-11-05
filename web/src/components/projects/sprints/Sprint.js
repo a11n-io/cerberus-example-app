@@ -3,7 +3,7 @@ import {Route, Routes, useParams} from "react-router-dom";
 import {useContext, useEffect} from "react";
 import useFetch from "../../../hooks/useFetch";
 import Loader from "../../../uikit/Loader";
-import Button from "../../../uikit/Button";
+import Btn from "../../../uikit/Btn";
 
 export default function Sprint() {
     const params = useParams()
@@ -74,6 +74,6 @@ function ChangeSprint(props) {
     }
 
     return <>
-        <Button onClick={handleButtonClicked}>{start ? "Start" : "End"} sprint</Button>
+        <Btn onClick={handleButtonClicked}>{start ? "Start" : "End"} sprint</Btn>
     </>
 }

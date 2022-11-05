@@ -1,6 +1,6 @@
 import useFetch from "../../hooks/useFetch";
 import Input from "../../uikit/Input";
-import Button from "../../uikit/Button";
+import Btn from "../../uikit/Btn";
 import {Link, useNavigate} from "react-router-dom";
 import Loader from "../../uikit/Loader";
 import {useContext, useState} from "react";
@@ -46,7 +46,7 @@ export default function Login() {
         <form onSubmit={handleLogin}>
             <Input required placeholder="Email" onChange={handleEmailChanged}/>
             <Input required placeholder="Password" type="password" onChange={handlePasswordChanged}/>
-            <Button type="submit">Login</Button>
+            <Btn type="submit">Login</Btn>
         </form>
         <Link to="/register">Register</Link>
     </>

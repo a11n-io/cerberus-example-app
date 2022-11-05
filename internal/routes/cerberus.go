@@ -3,8 +3,8 @@ package routes
 import (
 	"cerberus-example-app/env"
 	"fmt"
+	cerberus "github.com/a11n-io/go-cerberus"
 	"github.com/gin-gonic/gin"
-	cerberus "github.com/superkruger/go-cerberus"
 	"log"
 	"net/http"
 )

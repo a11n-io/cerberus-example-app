@@ -7,30 +7,32 @@ import (
 	"log"
 )
 
-type AuthRepo interface {
+type UserRepo interface {
 	Save(accountId, email, plainPassword, name string) (User, error)
 	FindOneByEmailAndPassword(email string, password string) (User, error)
+	FindAll(accountId string) ([]User, error)
 }
 
 type User struct {
-	Token     string `json:"token"`
-	Id        string `json:"id"`
-	AccountId string `json:"accountId"`
-	Name      string `json:"name"`
-	Email     string `json:"email"`
+	Token         string `json:"token"`
+	CerberusToken string `json:"cerberusToken"`
+	Id            string `json:"id"`
+	AccountId     string `json:"accountId"`
+	Name          string `json:"name"`
+	Email         string `json:"email"`
 }
 
-type authRepo struct {
+type userRepo struct {
 	db *sql.DB
 }
 
-func NewAuthRepo(db *sql.DB) AuthRepo {
-	return &authRepo{
+func NewUserRepo(db *sql.DB) UserRepo {
+	return &userRepo{
 		db: db,
 	}
 }
 
-func (r *authRepo) Save(accountId, email, plainPassword, name string) (user User, err error) {
+func (r *userRepo) Save(accountId, email, plainPassword, name string) (user User, err error) {
 
 	encryptedPassword, err := encryptPassword(plainPassword)
 	if err != nil {
@@ -72,7 +74,7 @@ func (r *authRepo) Save(accountId, email, plainPassword, name string) (user User
 	return
 }
 
-func (r *authRepo) FindOneByEmailAndPassword(email string, plainPassword string) (user User, err error) {
+func (r *userRepo) FindOneByEmailAndPassword(email string, plainPassword string) (user User, err error) {
 
 	stmt, err := r.db.Prepare("select id, account_id, name, password from user where email = ?")
 	if err != nil {
@@ -97,6 +99,37 @@ func (r *authRepo) FindOneByEmailAndPassword(email string, plainPassword string)
 		AccountId: accountId,
 		Name:      name,
 		Email:     email,
+	}
+
+	return
+}
+
+func (r *userRepo) FindAll(accountId string) (users []User, err error) {
+
+	stmt, err := r.db.Prepare("select id, name, email from user where account_id = ? order by name asc")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer stmt.Close()
+	rows, err := stmt.Query(accountId)
+	if err != nil {
+		return
+	}
+
+	for rows.Next() {
+		var id, name, email string
+		err = rows.Scan(&id, &name, &email)
+		if err != nil {
+			return
+		}
+
+		users = append(users, User{
+			Id:        id,
+			AccountId: accountId,
+			Name:      name,
+			Email:     email,
+		})
 	}
 
 	return

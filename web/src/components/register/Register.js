@@ -1,5 +1,5 @@
 import Input from "../../uikit/Input";
-import Button from "../../uikit/Button";
+import Btn from "../../uikit/Btn";
 import useFetch from "../../hooks/useFetch";
 import {useState} from "react";
 import Loader from "../../uikit/Loader";
@@ -47,7 +47,7 @@ export default function Register() {
             <Input required placeholder="Name" onChange={handleNameChanged}/>
             <Input required placeholder="Email" onChange={handleEmailChanged}/>
             <Input required placeholder="Password" type="password" onChange={handlePasswordChanged}/>
-            <Button type="submit">Register</Button>
+            <Btn type="submit">Register</Btn>
         </form>
     </>
 }

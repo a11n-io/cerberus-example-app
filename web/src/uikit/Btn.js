@@ -1,6 +1,7 @@
 import {clsx} from "clsx";
+import {Button} from "react-bootstrap";
 
-export default function Button(props) {
+export default function Btn(props) {
     const { children, outline, accent, className, ...rest } = props;
 
     const classNames = clsx({
@@ -13,8 +14,8 @@ export default function Button(props) {
     );
 
     return (
-        <button className={classNames} {...rest}>
+        <Button className={classNames} {...rest}>
             {children}
-        </button>
+        </Button>
     );
 }
