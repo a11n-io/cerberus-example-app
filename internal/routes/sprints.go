@@ -3,6 +3,7 @@ package routes
 import (
 	"cerberus-example-app/internal/services"
 	"fmt"
+	cerberus "github.com/a11n-io/go-cerberus"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -13,11 +14,12 @@ type SprintData struct {
 }
 
 type sprintRoutes struct {
-	service services.SprintService
+	service        services.SprintService
+	cerberusClient cerberus.Client
 }
 
-func NewSprintRoutes(service services.SprintService) Routable {
-	return &sprintRoutes{service: service}
+func NewSprintRoutes(service services.SprintService, cerberusClient cerberus.Client) Routable {
+	return &sprintRoutes{service: service, cerberusClient: cerberusClient}
 }
 
 func (r *sprintRoutes) RegisterRoutes(rg *gin.RouterGroup) {
@@ -29,18 +31,28 @@ func (r *sprintRoutes) RegisterRoutes(rg *gin.RouterGroup) {
 }
 
 func (r *sprintRoutes) Create(c *gin.Context) {
+
 	userId, exists := c.Get("userId")
 	if !exists {
 		c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
 	}
 
-	log.Println("User:", userId)
+	accountId, exists := c.Get("accountId")
+	if !exists {
+		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("no accountId")))
+	}
 
 	var resourceTypeData SprintData
 
 	projectId := c.Param("projectId")
 	if projectId == "" {
 		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("missing projectId")))
+		return
+	}
+
+	hasAccess, err := r.cerberusClient.HasAccess(c, accountId.(string), userId.(string), projectId, "CreateSprint")
+	if err != nil || !hasAccess {
+		c.AbortWithStatusJSON(http.StatusForbidden, jsonError(err))
 		return
 	}
 
@@ -94,11 +106,20 @@ func (r *sprintRoutes) Start(c *gin.Context) {
 		c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
 	}
 
-	log.Println("User:", userId)
+	accountId, exists := c.Get("accountId")
+	if !exists {
+		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("no accountId")))
+	}
 
 	sprintId := c.Param("sprintId")
 	if sprintId == "" {
 		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("missing sprintId")))
+		return
+	}
+
+	hasAccess, err := r.cerberusClient.HasAccess(c, accountId.(string), userId.(string), sprintId, "StartSprint")
+	if err != nil || !hasAccess {
+		c.AbortWithStatusJSON(http.StatusForbidden, jsonError(err))
 		return
 	}
 
@@ -120,11 +141,20 @@ func (r *sprintRoutes) End(c *gin.Context) {
 		c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
 	}
 
-	log.Println("User:", userId)
+	accountId, exists := c.Get("accountId")
+	if !exists {
+		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("no accountId")))
+	}
 
 	sprintId := c.Param("sprintId")
 	if sprintId == "" {
 		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("missing sprintId")))
+		return
+	}
+
+	hasAccess, err := r.cerberusClient.HasAccess(c, accountId.(string), userId.(string), sprintId, "EndSprint")
+	if err != nil || !hasAccess {
+		c.AbortWithStatusJSON(http.StatusForbidden, jsonError(err))
 		return
 	}
 
@@ -146,11 +176,20 @@ func (r *sprintRoutes) Get(c *gin.Context) {
 		c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
 	}
 
-	log.Println("User:", userId)
+	accountId, exists := c.Get("accountId")
+	if !exists {
+		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("no accountId")))
+	}
 
 	sprintId := c.Param("sprintId")
 	if sprintId == "" {
 		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("missing sprintId")))
+		return
+	}
+
+	hasAccess, err := r.cerberusClient.HasAccess(c, accountId.(string), userId.(string), sprintId, "ReadSprint")
+	if err != nil || !hasAccess {
+		c.AbortWithStatusJSON(http.StatusForbidden, jsonError(err))
 		return
 	}
 

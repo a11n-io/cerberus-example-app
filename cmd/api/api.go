@@ -84,9 +84,9 @@ func privateRoutes(
 	storyService services.StoryService) []routes.Routable {
 	return []routes.Routable{
 		routes.NewCerberusRoutes(env, cerberusClient),
-		routes.NewUserRoutes(userService),
-		routes.NewProjectRoutes(projectService),
-		routes.NewSprintRoutes(sprintService),
-		routes.NewStoryRoutes(storyService),
+		routes.NewUserRoutes(userService, cerberusClient),
+		routes.NewProjectRoutes(projectService, cerberusClient),
+		routes.NewSprintRoutes(sprintService, cerberusClient),
+		routes.NewStoryRoutes(storyService, cerberusClient),
 	}
 }

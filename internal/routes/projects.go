@@ -3,8 +3,8 @@ package routes
 import (
 	"cerberus-example-app/internal/services"
 	"fmt"
+	cerberus "github.com/a11n-io/go-cerberus"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 )
 
@@ -14,11 +14,12 @@ type ProjectData struct {
 }
 
 type projectRoutes struct {
-	service services.ProjectService
+	service        services.ProjectService
+	cerberusClient cerberus.Client
 }
 
-func NewProjectRoutes(service services.ProjectService) Routable {
-	return &projectRoutes{service: service}
+func NewProjectRoutes(service services.ProjectService, cerberusClient cerberus.Client) Routable {
+	return &projectRoutes{service: service, cerberusClient: cerberusClient}
 }
 
 func (r *projectRoutes) RegisterRoutes(rg *gin.RouterGroup) {
@@ -33,13 +34,17 @@ func (r *projectRoutes) Create(c *gin.Context) {
 		c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
 	}
 
-	log.Println("User:", userId)
-
 	var projectData ProjectData
 
 	accountId := c.Param("accountId")
 	if accountId == "" {
 		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("missing accountId")))
+		return
+	}
+
+	hasAccess, err := r.cerberusClient.HasAccess(c, accountId, userId.(string), accountId, "CreateProject")
+	if err != nil || !hasAccess {
+		c.AbortWithStatusJSON(http.StatusForbidden, jsonError(err))
 		return
 	}
 
@@ -63,12 +68,10 @@ func (r *projectRoutes) Create(c *gin.Context) {
 }
 
 func (r *projectRoutes) FindAll(c *gin.Context) {
-	userId, exists := c.Get("userId")
-	if !exists {
-		c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
-	}
-
-	log.Println("User:", userId)
+	//userId, exists := c.Get("userId")
+	//if !exists {
+	//	c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
+	//}
 
 	accountId := c.Param("accountId")
 	if accountId == "" {
@@ -94,11 +97,20 @@ func (r *projectRoutes) Get(c *gin.Context) {
 		c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
 	}
 
-	log.Println("User:", userId)
+	accountId, exists := c.Get("accountId")
+	if !exists {
+		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("no accountId")))
+	}
 
 	projectId := c.Param("projectId")
 	if projectId == "" {
 		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("missing projectId")))
+		return
+	}
+
+	hasAccess, err := r.cerberusClient.HasAccess(c, accountId.(string), userId.(string), projectId, "ReadProject")
+	if err != nil || !hasAccess {
+		c.AbortWithStatusJSON(http.StatusForbidden, jsonError(err))
 		return
 	}
 

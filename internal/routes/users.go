@@ -2,6 +2,8 @@ package routes
 
 import (
 	"cerberus-example-app/internal/services"
+	"fmt"
+	cerberus "github.com/a11n-io/go-cerberus"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -14,13 +16,12 @@ type UserData struct {
 }
 
 type userRoutes struct {
-	userService services.UserService
+	userService    services.UserService
+	cerberusClient cerberus.Client
 }
 
-func NewUserRoutes(userService services.UserService) Routable {
-	return &userRoutes{
-		userService: userService,
-	}
+func NewUserRoutes(userService services.UserService, cerberusClient cerberus.Client) Routable {
+	return &userRoutes{userService: userService, cerberusClient: cerberusClient}
 }
 
 func (r *userRoutes) RegisterRoutes(rg *gin.RouterGroup) {
@@ -29,6 +30,22 @@ func (r *userRoutes) RegisterRoutes(rg *gin.RouterGroup) {
 }
 
 func (r *userRoutes) Add(c *gin.Context) {
+	userId, exists := c.Get("userId")
+	if !exists {
+		c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
+	}
+
+	accountId, exists := c.Get("accountId")
+	if !exists {
+		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("no accountId")))
+	}
+
+	hasAccess, err := r.cerberusClient.HasAccess(c, accountId.(string), userId.(string), accountId.(string), "AddUser")
+	if err != nil || !hasAccess {
+		c.AbortWithStatusJSON(http.StatusForbidden, jsonError(err))
+		return
+	}
+
 	var userData UserData
 
 	if err := c.Bind(&userData); err != nil {

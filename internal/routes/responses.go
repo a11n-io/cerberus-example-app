@@ -11,9 +11,13 @@ type successResponse struct {
 }
 
 func jsonError(err error) errorResponse {
+	var message string
+	if err != nil {
+		message = err.Error()
+	}
 	return errorResponse{
 		Code:    500,
-		Message: err.Error(),
+		Message: message,
 	}
 }
 
