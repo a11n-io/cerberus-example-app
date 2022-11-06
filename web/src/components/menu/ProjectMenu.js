@@ -1,35 +1,21 @@
 
-import {useEffect, useState} from "react";
-import {Link, NavLink, Route, Routes, useParams} from "react-router-dom";
-import useFetch from "../../hooks/useFetch";
-import Loader from "../../uikit/Loader";
+import {useContext} from "react";
+import {Link, NavLink, Route, Routes} from "react-router-dom";
 import SprintMenu from "./SprintMenu";
+import {SprintProvider} from "../projects/sprints/SprintContext";
+import {ProjectContext} from "../projects/ProjectContext";
 
 export default function ProjectMenu() {
-    const [project, setProject] = useState()
-    const params = useParams()
-    const {get, loading} = useFetch("/api/")
+    const projectCtx = useContext(ProjectContext)
 
-    useEffect(() => {
-        if (params.id) {
-            get("projects/" + params.id)
-                .then(d => setProject(d))
-                .catch(e => console.log(e))
-        }
-    }, [])
-
-    if (loading) {
-        return <Loader/>
-    }
-
-    if (!project) {
+    if (!projectCtx.project) {
         return <></>
     }
 
     return <>
         <Routes>
-            <Route path="sprints/:id/*" element={<SprintMenu project={project}/>}/>
-            <Route exact path="/*" element={<Menu project={project}/>}/>
+            <Route path="sprints/:id/*" element={<SprintMenu/>}/>
+            <Route exact path="/*" element={<Menu project={projectCtx.project}/>}/>
         </Routes>
     </>
 
@@ -43,6 +29,9 @@ function Menu(props) {
             <Link to={`/projects`}>Projects</Link>
             <p>{project.name}</p>
             <ul>
+                <li className="nav-item">
+                    <NavLink end to={`/projects/${project.id}/permissions`}>Permissions</NavLink>
+                </li>
                 <li className="nav-item">
                     <NavLink end to={`/projects/${project.id}/sprints`}>Sprints</NavLink>
                 </li>

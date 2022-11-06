@@ -4,7 +4,7 @@ import useFetch from "../../hooks/useFetch";
 import {AuthContext} from "../../context/AuthContext";
 import Loader from "../../uikit/Loader";
 import {Routes, Route, Link} from "react-router-dom";
-import App from "./Project";
+import Project from "./Project";
 import CreateProject from "./CreateProject";
 
 export default function Projects() {
@@ -12,7 +12,7 @@ export default function Projects() {
     return <>
 
         <Routes>
-            <Route path=":id/*" element={<App/>}/>
+            <Route path=":id/*" element={<Project/>}/>
             <Route exact path="/" element={<ProjectList/>}/>
         </Routes>
 

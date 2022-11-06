@@ -3,6 +3,7 @@ package services
 import (
 	"cerberus-example-app/internal/repositories"
 	"context"
+	"fmt"
 	cerberus "github.com/a11n-io/go-cerberus"
 )
 
@@ -27,9 +28,20 @@ func NewProjectService(
 }
 
 func (s *projectService) Create(ctx context.Context, accountId, name, description string) (repositories.Project, error) {
+
+	userId := ctx.Value("userId")
+	if userId == nil {
+		return repositories.Project{}, fmt.Errorf("no userId")
+	}
+
 	project, err := s.repo.Create(accountId, name, description)
 
 	_, err = s.cerberusClient.CreateResource(ctx, accountId, project.Id, accountId, "Project")
+	if err != nil {
+		return repositories.Project{}, err
+	}
+
+	err = s.cerberusClient.CreatePermission(ctx, accountId, userId.(string), project.Id, []string{"ManageProject"})
 	if err != nil {
 		return repositories.Project{}, err
 	}

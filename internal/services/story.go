@@ -32,9 +32,9 @@ func NewStoryService(
 
 func (s *storyService) Create(ctx context.Context, sprintId, description string) (repositories.Story, error) {
 
-	story, err := s.repo.Create(sprintId, description)
-	if err != nil {
-		return repositories.Story{}, err
+	userId := ctx.Value("userId")
+	if userId == nil {
+		return repositories.Story{}, fmt.Errorf("no userId")
 	}
 
 	accountId := ctx.Value("accountId")
@@ -42,7 +42,17 @@ func (s *storyService) Create(ctx context.Context, sprintId, description string)
 		return repositories.Story{}, fmt.Errorf("no accountId")
 	}
 
+	story, err := s.repo.Create(sprintId, description)
+	if err != nil {
+		return repositories.Story{}, err
+	}
+
 	_, err = s.cerberusClient.CreateResource(ctx, accountId.(string), story.Id, sprintId, "Story")
+	if err != nil {
+		return repositories.Story{}, err
+	}
+
+	err = s.cerberusClient.CreatePermission(ctx, accountId.(string), userId.(string), story.Id, []string{"ManageStory"})
 	if err != nil {
 		return repositories.Story{}, err
 	}

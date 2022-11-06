@@ -88,7 +88,8 @@ func (r *storyRepo) FindBySprint(sprintId string) (stories []Story, err error) {
 	}
 
 	for rows.Next() {
-		var id, description, status, userId string
+		var id, description, status string
+		var userId sql.NullString
 		var estimation int
 		err = rows.Scan(&id, &estimation, &description, &status, &userId)
 		if err != nil {
@@ -101,7 +102,7 @@ func (r *storyRepo) FindBySprint(sprintId string) (stories []Story, err error) {
 			Estimation:  estimation,
 			Description: description,
 			Status:      status,
-			Assignee:    userId,
+			Assignee:    userId.String,
 		})
 	}
 
@@ -116,7 +117,8 @@ func (r *storyRepo) Get(storyId string) (story Story, err error) {
 		return
 	}
 	defer stmt.Close()
-	var sprintId, description, status, userId string
+	var sprintId, description, status string
+	var userId sql.NullString
 	var estimation int
 	err = stmt.QueryRow(storyId).Scan(&sprintId, &estimation, &description, &status, &userId)
 	if err != nil {
@@ -124,12 +126,12 @@ func (r *storyRepo) Get(storyId string) (story Story, err error) {
 	}
 
 	story = Story{
-		Id:          sprintId,
+		Id:          storyId,
 		SprintId:    sprintId,
 		Estimation:  estimation,
 		Description: description,
 		Status:      status,
-		Assignee:    userId,
+		Assignee:    userId.String,
 	}
 
 	return
@@ -168,6 +170,7 @@ func (r *storyRepo) Estimate(storyId string, estimation int) (story Story, err e
 }
 
 func (r *storyRepo) ChangeStatus(storyId, status string) (story Story, err error) {
+	log.Println("ChangeStatus", storyId, status)
 	tx, err := r.db.Begin()
 	if err != nil {
 		log.Println(err)

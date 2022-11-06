@@ -4,10 +4,14 @@ import {useContext, useEffect} from "react";
 import useFetch from "../../../hooks/useFetch";
 import Loader from "../../../uikit/Loader";
 import Btn from "../../../uikit/Btn";
+import Stories from "./stories/Stories";
+import {Permissions} from "cerberus-reactjs";
+import {AuthContext} from "../../../context/AuthContext";
 
 export default function Sprint() {
     const params = useParams()
     const sprintCtx = useContext(SprintContext)
+    const authCtx = useContext(AuthContext)
     const {get, loading} = useFetch("/api/")
 
     useEffect(() => {
@@ -26,9 +30,15 @@ export default function Sprint() {
 
     return <>
         <Routes>
+            <Route path="stories/*" element={<Stories/>}/>
             <Route exact path="/" element={<Dashboard/>}/>
+            <Route exact path="permissions" element={<Permissions
+                cerberusUrl={"http://localhost:8000/api/"}
+                cerberusToken={authCtx.user.cerberusToken}
+                accountId={authCtx.user.accountId}
+                resourceId={sprintCtx.sprint.id}
+            />}/>
         </Routes>
-
     </>
 }
 

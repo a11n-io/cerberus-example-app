@@ -24,8 +24,8 @@ func NewAuthRoutes(userService services.UserService) Routable {
 }
 
 func (r *authRoutes) RegisterRoutes(rg *gin.RouterGroup) {
-	rg.POST("userService/register", func(c *gin.Context) { r.Register(c) })
-	rg.POST("userService/login", func(c *gin.Context) { r.Login(c) })
+	rg.POST("auth/register", func(c *gin.Context) { r.Register(c) })
+	rg.POST("auth/login", func(c *gin.Context) { r.Login(c) })
 }
 
 func (r *authRoutes) Register(c *gin.Context) {

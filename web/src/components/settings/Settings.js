@@ -2,6 +2,7 @@ import {Route, Routes} from "react-router-dom";
 import {useContext} from "react";
 import {AuthContext} from "../../context/AuthContext";
 import {Permissions} from "cerberus-reactjs";
+import {ProjectContext} from "../projects/ProjectContext";
 
 export default function Settings() {
     const authCtx = useContext(AuthContext)

@@ -4,15 +4,22 @@ import {useContext, useEffect, useState} from "react";
 import useFetch from "../../../../hooks/useFetch";
 import Loader from "../../../../uikit/Loader";
 import {Form} from "react-bootstrap";
+import {StoryContext} from "./StoryContext";
+import {Permissions} from "cerberus-reactjs";
+import {AuthContext} from "../../../../context/AuthContext";
 
 export default function Story() {
     const params = useParams()
-    const [story, setStory] = useContext(null)
+    const storyCtx = useContext(StoryContext)
+    const authCtx = useContext(AuthContext)
     const {get, loading} = useFetch("/api/")
 
     useEffect(() => {
+
+        console.log("Story ID", params.id)
+
         get("stories/"+params.id)
-            .then(d => setStory(d))
+            .then(d => storyCtx.setStory(d))
             .catch(e => console.log(e))
     }, [])
 
@@ -20,13 +27,19 @@ export default function Story() {
         return <Loader/>
     }
 
-    if (!story) {
+    if (!storyCtx.story) {
         return <>Could not get story</>
     }
 
     return <>
         <Routes>
-            <Route exact path="/" element={<Dashboard story={story} setStory={setStory}/>}/>
+            <Route exact path="/" element={<Dashboard story={storyCtx.story} setStory={storyCtx.setStory}/>}/>
+            <Route exact path="permissions" element={<Permissions
+                cerberusUrl={"http://localhost:8000/api/"}
+                cerberusToken={authCtx.user.cerberusToken}
+                accountId={authCtx.user.accountId}
+                resourceId={storyCtx.story.id}
+            />}/>
         </Routes>
     </>
 }
@@ -40,6 +53,10 @@ function Dashboard(props) {
     const [assignee, setAssignee] = useState("")
     const {story, setStory} = props
 
+
+    console.log("Story ID Dash", story.id)
+
+
     useEffect(() => {
         get("users")
             .then(d => setUsers(d))
@@ -47,14 +64,18 @@ function Dashboard(props) {
     }, [])
 
     useEffect(() => {
-        setEstimate(story.estimate)
+        setEstimate(story.estimation)
         setStatus(story.status)
         setAssignee(story.assignee)
     }, [story])
 
     function handleEstimateChange(e) {
+        setEstimate(e.target.value)
+    }
+
+    function handleEstimateBlur(e) {
         post("stories/"+story.id + "/estimate", {
-            estimation: e.target.value
+            estimation: estimate
         })
             .then(d => {
                 if (d) {
@@ -99,7 +120,7 @@ function Dashboard(props) {
         <Form className="mb-5">
             <Form.Group className="mb-3">
                 <Form.Label>Estimate</Form.Label>
-                <Form.Control type="number" value={estimate} onBlur={handleEstimateChange}/>
+                <Form.Control type="number" value={estimate} onChange={handleEstimateChange} onBlur={handleEstimateBlur}/>
             </Form.Group>
             <Form.Group className="mb-3">
                 <Form.Label>Status</Form.Label>
@@ -115,7 +136,7 @@ function Dashboard(props) {
                     {
                         users.map(user => {
                             return (
-                                <option value={user.id}>{user.displayName}</option>
+                                <option key={user.id} value={user.id}>{user.displayName}</option>
                             )
                         })
                     }

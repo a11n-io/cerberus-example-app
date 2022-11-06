@@ -31,9 +31,9 @@ func NewSprintService(
 
 func (s *sprintService) Create(ctx context.Context, projectId, goal string) (repositories.Sprint, error) {
 
-	sprint, err := s.repo.Create(projectId, goal)
-	if err != nil {
-		return repositories.Sprint{}, err
+	userId := ctx.Value("userId")
+	if userId == nil {
+		return repositories.Sprint{}, fmt.Errorf("no userId")
 	}
 
 	accountId := ctx.Value("accountId")
@@ -41,7 +41,17 @@ func (s *sprintService) Create(ctx context.Context, projectId, goal string) (rep
 		return repositories.Sprint{}, fmt.Errorf("no accountId")
 	}
 
+	sprint, err := s.repo.Create(projectId, goal)
+	if err != nil {
+		return repositories.Sprint{}, err
+	}
+
 	_, err = s.cerberusClient.CreateResource(ctx, accountId.(string), sprint.Id, projectId, "Sprint")
+	if err != nil {
+		return repositories.Sprint{}, err
+	}
+
+	err = s.cerberusClient.CreatePermission(ctx, accountId.(string), userId.(string), sprint.Id, []string{"ManageSprint"})
 	if err != nil {
 		return repositories.Sprint{}, err
 	}

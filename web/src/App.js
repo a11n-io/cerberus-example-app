@@ -9,42 +9,46 @@ import Projects from "./components/projects/Projects";
 import ProjectMenu from "./components/menu/ProjectMenu";
 import SettingsMenu from "./components/menu/SettingsMenu";
 import Settings from "./components/settings/Settings";
+import {SprintProvider} from "./components/projects/sprints/SprintContext";
+import {StoryProvider} from "./components/projects/sprints/stories/StoryContext";
 
 function App() {
   return (
       <BrowserRouter>
-          <div className="grid-container">
-              <div className="grid-header">
-                  <header>
-                      <Navbar/>
-                  </header>
-              </div>
-              <div className="grid-menu">
-                  <AuthGuard>
-                      <Routes>
-                          <Route path="/projects/:id/*" element={<ProjectProvider><ProjectMenu/></ProjectProvider>}/>
-                          <Route path="/settings/*" element={<SettingsMenu/>}/>
-                      </Routes>
-                  </AuthGuard>
-              </div>
-              <div className="grid-main">
-                  <main className="container">
-                      <ProjectProvider>
-                          <Routes>
-                              <Route path="/settings/*" element={<AuthGuard redirectTo="/login"><Settings/></AuthGuard>}/>
-                              <Route path="/projects/*" element={<AuthGuard redirectTo="/login"><Projects/></AuthGuard>}/>
-                              <Route exact path="/" element={<AuthGuard redirectTo="/login"><Home/></AuthGuard>}/>
-                              <Route exact path="/login" element={<Login/>}/>
-                              <Route exact path="/register" element={<Register/>}/>
-                          </Routes>
-                      </ProjectProvider>
-                  </main>
-              </div>
-              <div className="grid-footer">
-                  <footer>
-                  </footer>
-              </div>
-          </div>
+          <ProjectProvider>
+              <SprintProvider>
+                  <StoryProvider>
+                      <div className="grid-container">
+                          <div className="grid-header">
+                              <header>
+                                  <Navbar/>
+                              </header>
+                          </div>
+                          <div className="grid-menu">
+                              <Routes>
+                                  <Route path="/projects/:id/*" element={<AuthGuard><ProjectMenu/></AuthGuard>}/>
+                                  <Route path="/settings/*" element={<AuthGuard><SettingsMenu/></AuthGuard>}/>
+                              </Routes>
+                          </div>
+                          <div className="grid-main">
+                              <main className="container">
+                                      <Routes>
+                                          <Route path="/settings/*" element={<AuthGuard redirectTo="/login"><Settings/></AuthGuard>}/>
+                                          <Route path="/projects/*" element={<AuthGuard redirectTo="/login"><Projects/></AuthGuard>}/>
+                                          <Route exact path="/" element={<AuthGuard redirectTo="/login"><Home/></AuthGuard>}/>
+                                          <Route exact path="/login" element={<Login/>}/>
+                                          <Route exact path="/register" element={<Register/>}/>
+                                      </Routes>
+                              </main>
+                          </div>
+                          <div className="grid-footer">
+                              <footer>
+                              </footer>
+                          </div>
+                      </div>
+                  </StoryProvider>
+              </SprintProvider>
+          </ProjectProvider>
       </BrowserRouter>
   );
 }

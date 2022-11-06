@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
 type StoryData struct {
 	Description string `json:"description"`
-	Estimation  int    `json:"estimation"`
+	Estimation  string `json:"estimation"`
 	Status      string `json:"status"`
 	UserId      string `json:"userId"`
 }
@@ -113,10 +114,15 @@ func (r *storyRoutes) Estimate(c *gin.Context) {
 		return
 	}
 
+	estimation, err := strconv.ParseInt(data.Estimation, 10, 32)
+	if err != nil {
+		estimation = 0
+	}
+
 	story, err := r.service.Estimate(
 		c,
 		storyId,
-		data.Estimation,
+		int(estimation),
 	)
 	if err != nil {
 		c.AbortWithStatusJSON(500, jsonError(err))

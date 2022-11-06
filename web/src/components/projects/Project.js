@@ -4,17 +4,18 @@ import useFetch from "../../hooks/useFetch";
 import Loader from "../../uikit/Loader";
 import Sprints from "./sprints/Sprints";
 import {ProjectContext} from "./ProjectContext";
-import {SprintProvider} from "./sprints/SprintContext";
+import {Permissions} from "cerberus-reactjs";
+import {AuthContext} from "../../context/AuthContext";
 
 export default function Project() {
     const params = useParams()
     const projectCtx = useContext(ProjectContext)
+    const authCtx = useContext(AuthContext)
     const {get, loading} = useFetch("/api/")
 
     useEffect(() => {
         get("projects/"+params.id)
             .then(d => {
-                console.log(d);
                 projectCtx.setProject(d);
             })
             .catch(e => console.log(e))
@@ -29,13 +30,16 @@ export default function Project() {
     }
 
     return <>
-
-        <SprintProvider>
-            <Routes>
-                <Route path="sprints/*" element={<Sprints/>}/>
-                <Route exact path="/" element={<ProjectDashboard/>}/>
-            </Routes>
-        </SprintProvider>
+        <Routes>
+            <Route path="sprints/*" element={<Sprints/>}/>
+            <Route exact path="/" element={<ProjectDashboard/>}/>
+            <Route exact path="permissions" element={<Permissions
+                cerberusUrl={"http://localhost:8000/api/"}
+                cerberusToken={authCtx.user.cerberusToken}
+                accountId={authCtx.user.accountId}
+                resourceId={projectCtx.project.id}
+            />}/>
+        </Routes>
     </>
 }
 
