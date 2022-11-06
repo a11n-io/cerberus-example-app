@@ -8,6 +8,8 @@ import Sprint from "./Story";
 import CreateStory from "./CreateStory";
 import Story from "./Story";
 import {SprintContext} from "../SprintContext";
+import {AccessGuard} from "cerberus-reactjs";
+import {AuthContext} from "../../../../context/AuthContext";
 
 export default function Stories() {
 
@@ -21,6 +23,7 @@ export default function Stories() {
 
 function StoryList() {
     const [stories, setStories] = useState([])
+    const authCtx = useContext(AuthContext)
     const sprintCtx = useContext(SprintContext)
     const {get, loading} = useFetch("/api/")
     const [showCreate, setShowCreate] = useState(false)
@@ -58,6 +61,13 @@ function StoryList() {
             }
         </ul>
 
+        <AccessGuard
+            cerberusUrl={"http://localhost:8000/api/"}
+            cerberusToken={authCtx.user.cerberusToken}
+            accountId={authCtx.user.accountId}
+            resourceId={sprintCtx.sprint.id}
+            userId={authCtx.user.id}
+            action="CreateStory">
         {
             !showCreate && <Link to="" onClick={handleNewClicked}>New Story</Link>
         }
@@ -67,6 +77,6 @@ function StoryList() {
                 setStories={setStories}
                 setShowCreate={setShowCreate}/>
         }
-
+        </AccessGuard>
     </>
 }

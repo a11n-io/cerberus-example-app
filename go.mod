@@ -3,7 +3,7 @@ module cerberus-example-app
 go 1.18
 
 require (
-	github.com/a11n-io/go-cerberus v0.3.12
+	github.com/a11n-io/go-cerberus v0.3.13
 	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-gonic/gin v1.8.1
 	github.com/golang-jwt/jwt/v4 v4.4.2
@@ -12,7 +12,6 @@ require (
 	github.com/joho/godotenv v1.4.0
 	github.com/mattn/go-sqlite3 v1.14.15
 	github.com/prinick96/elog v0.0.0-20220520175626-b729d74ceb5b
-	github.com/a11n-io/go-cerberus v0.3.12
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 )
 
