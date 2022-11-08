@@ -6,8 +6,7 @@ import Loader from "../../uikit/Loader";
 import {Routes, Route, Link} from "react-router-dom";
 import Project from "./Project";
 import CreateProject from "./CreateProject";
-import {AccessGuard} from "cerberus-reactjs"
-import {ProjectContext} from "./ProjectContext";
+import {AccessGuard, WsContext} from "cerberus-reactjs"
 
 export default function Projects() {
 
@@ -25,7 +24,7 @@ export default function Projects() {
 function ProjectList() {
     const [projects, setProjects] = useState([])
     const authCtx = useContext(AuthContext)
-    const projectCtx = useContext(ProjectContext)
+    const wsCtx = useContext(WsContext)
     const {get, loading} = useFetch("/api/")
     const [showCreate, setShowCreate] = useState(false)
 
@@ -58,18 +57,11 @@ function ProjectList() {
             }
         </ul>
 
-        <AccessGuard
-            cerberusUrl={"http://localhost:8000/api/"}
-            cerberusToken={authCtx.user.cerberusToken}
-            accountId={authCtx.user.accountId}
-            resourceId={authCtx.user.accountId}
-            userId={authCtx.user.id}
-            action="CreateProject">
-
-        <Link to="" onClick={handleNewClicked}>New Project</Link>
-        {
-            showCreate && <CreateProject/>
-        }
+        <AccessGuard wsContext={wsCtx} resourceId={authCtx.user.accountId} action="CreateProject">
+            <Link to="" onClick={handleNewClicked}>New Project</Link>
+            {
+                showCreate && <CreateProject/>
+            }
         </AccessGuard>
     </>
 }

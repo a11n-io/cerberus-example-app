@@ -7,7 +7,7 @@ import {ProjectContext} from "../ProjectContext";
 import Sprint from "./Sprint";
 import CreateSprint from "./CreateSprint";
 import {AuthContext} from "../../../context/AuthContext";
-import {AccessGuard} from "cerberus-reactjs";
+import {AccessGuard, WsContext} from "cerberus-reactjs";
 
 export default function Sprints() {
 
@@ -23,6 +23,7 @@ function SprintList() {
     const [sprints, setSprints] = useState([])
     const authCtx = useContext(AuthContext)
     const projectCtx = useContext(ProjectContext)
+    const wsCtx = useContext(WsContext)
     const {get, loading} = useFetch("/api/")
     const [showCreate, setShowCreate] = useState(false)
 
@@ -59,22 +60,16 @@ function SprintList() {
             }
         </ul>
 
-        <AccessGuard
-            cerberusUrl={"http://localhost:8000/api/"}
-            cerberusToken={authCtx.user.cerberusToken}
-            accountId={authCtx.user.accountId}
-            resourceId={projectCtx.project.id}
-            userId={authCtx.user.id}
-            action="CreateSprint">
-        {
-            !showCreate && <Link to="" onClick={handleNewClicked}>New Sprint</Link>
-        }
-        {
-            showCreate && <CreateSprint
-                sprints={sprints}
-                setSprints={setSprints}
-                setShowCreate={setShowCreate}/>
-        }
+        <AccessGuard wsContext={wsCtx} resourceId={projectCtx.project.id} action="CreateSprint">
+            {
+                !showCreate && <Link to="" onClick={handleNewClicked}>New Sprint</Link>
+            }
+            {
+                showCreate && <CreateSprint
+                    sprints={sprints}
+                    setSprints={setSprints}
+                    setShowCreate={setShowCreate}/>
+            }
         </AccessGuard>
     </>
 }

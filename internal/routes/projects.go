@@ -29,10 +29,6 @@ func (r *projectRoutes) RegisterRoutes(rg *gin.RouterGroup) {
 }
 
 func (r *projectRoutes) Create(c *gin.Context) {
-	userId, exists := c.Get("userId")
-	if !exists {
-		c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
-	}
 
 	var projectData ProjectData
 
@@ -42,7 +38,7 @@ func (r *projectRoutes) Create(c *gin.Context) {
 		return
 	}
 
-	hasAccess, err := r.cerberusClient.HasAccess(c, accountId, userId.(string), accountId, "CreateProject")
+	hasAccess, err := r.cerberusClient.HasAccess(c, accountId, "CreateProject")
 	if err != nil || !hasAccess {
 		c.AbortWithStatusJSON(http.StatusForbidden, jsonError(err))
 		return
@@ -92,15 +88,6 @@ func (r *projectRoutes) FindAll(c *gin.Context) {
 }
 
 func (r *projectRoutes) Get(c *gin.Context) {
-	userId, exists := c.Get("userId")
-	if !exists {
-		c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
-	}
-
-	accountId, exists := c.Get("accountId")
-	if !exists {
-		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("no accountId")))
-	}
 
 	projectId := c.Param("projectId")
 	if projectId == "" {
@@ -108,7 +95,7 @@ func (r *projectRoutes) Get(c *gin.Context) {
 		return
 	}
 
-	hasAccess, err := r.cerberusClient.HasAccess(c, accountId.(string), userId.(string), projectId, "ReadProject")
+	hasAccess, err := r.cerberusClient.HasAccess(c, projectId, "ReadProject")
 	if err != nil || !hasAccess {
 		c.AbortWithStatusJSON(http.StatusForbidden, jsonError(err))
 		return

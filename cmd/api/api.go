@@ -56,7 +56,6 @@ func main() {
 	publicRoutes := publicRoutes(userService)
 
 	privateRoutes := privateRoutes(
-		_env,
 		cerberusClient,
 		userService,
 		services.NewProjectService(repositories.NewProjectRepo(db), cerberusClient),
@@ -76,14 +75,12 @@ func publicRoutes(
 }
 
 func privateRoutes(
-	env env.EnvApp,
 	cerberusClient cerberus.Client,
 	userService services.UserService,
 	projectService services.ProjectService,
 	sprintService services.SprintService,
 	storyService services.StoryService) []routes.Routable {
 	return []routes.Routable{
-		routes.NewCerberusRoutes(env, cerberusClient),
 		routes.NewUserRoutes(userService, cerberusClient),
 		routes.NewProjectRoutes(projectService, cerberusClient),
 		routes.NewSprintRoutes(sprintService, cerberusClient),

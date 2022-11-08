@@ -35,15 +35,6 @@ func (r *storyRoutes) RegisterRoutes(rg *gin.RouterGroup) {
 }
 
 func (r *storyRoutes) Create(c *gin.Context) {
-	userId, exists := c.Get("userId")
-	if !exists {
-		c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
-	}
-
-	accountId, exists := c.Get("accountId")
-	if !exists {
-		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("no accountId")))
-	}
 
 	var data StoryData
 
@@ -53,7 +44,7 @@ func (r *storyRoutes) Create(c *gin.Context) {
 		return
 	}
 
-	hasAccess, err := r.cerberusClient.HasAccess(c, accountId.(string), userId.(string), sprintId, "CreateStory")
+	hasAccess, err := r.cerberusClient.HasAccess(c, sprintId, "CreateStory")
 	if err != nil || !hasAccess {
 		c.AbortWithStatusJSON(http.StatusForbidden, jsonError(err))
 		return
@@ -98,15 +89,6 @@ func (r *storyRoutes) FindBySprint(c *gin.Context) {
 }
 
 func (r *storyRoutes) Get(c *gin.Context) {
-	userId, exists := c.Get("userId")
-	if !exists {
-		c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
-	}
-
-	accountId, exists := c.Get("accountId")
-	if !exists {
-		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("no accountId")))
-	}
 
 	storyId := c.Param("storyId")
 	if storyId == "" {
@@ -114,7 +96,7 @@ func (r *storyRoutes) Get(c *gin.Context) {
 		return
 	}
 
-	hasAccess, err := r.cerberusClient.HasAccess(c, accountId.(string), userId.(string), storyId, "ReadStory")
+	hasAccess, err := r.cerberusClient.HasAccess(c, storyId, "ReadStory")
 	if err != nil || !hasAccess {
 		c.AbortWithStatusJSON(http.StatusForbidden, jsonError(err))
 		return
@@ -133,15 +115,6 @@ func (r *storyRoutes) Get(c *gin.Context) {
 }
 
 func (r *storyRoutes) Estimate(c *gin.Context) {
-	userId, exists := c.Get("userId")
-	if !exists {
-		c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
-	}
-
-	accountId, exists := c.Get("accountId")
-	if !exists {
-		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("no accountId")))
-	}
 
 	storyId := c.Param("storyId")
 	if storyId == "" {
@@ -149,7 +122,7 @@ func (r *storyRoutes) Estimate(c *gin.Context) {
 		return
 	}
 
-	hasAccess, err := r.cerberusClient.HasAccess(c, accountId.(string), userId.(string), storyId, "EstimateStory")
+	hasAccess, err := r.cerberusClient.HasAccess(c, storyId, "EstimateStory")
 	if err != nil || !hasAccess {
 		c.AbortWithStatusJSON(http.StatusForbidden, jsonError(err))
 		return
@@ -181,15 +154,6 @@ func (r *storyRoutes) Estimate(c *gin.Context) {
 }
 
 func (r *storyRoutes) ChangeStatus(c *gin.Context) {
-	userId, exists := c.Get("userId")
-	if !exists {
-		c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
-	}
-
-	accountId, exists := c.Get("accountId")
-	if !exists {
-		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("no accountId")))
-	}
 
 	storyId := c.Param("storyId")
 	if storyId == "" {
@@ -197,7 +161,7 @@ func (r *storyRoutes) ChangeStatus(c *gin.Context) {
 		return
 	}
 
-	hasAccess, err := r.cerberusClient.HasAccess(c, accountId.(string), userId.(string), storyId, "ChangeStoryStatus")
+	hasAccess, err := r.cerberusClient.HasAccess(c, storyId, "ChangeStoryStatus")
 	if err != nil || !hasAccess {
 		c.AbortWithStatusJSON(http.StatusForbidden, jsonError(err))
 		return
@@ -224,15 +188,6 @@ func (r *storyRoutes) ChangeStatus(c *gin.Context) {
 }
 
 func (r *storyRoutes) Assign(c *gin.Context) {
-	userId, exists := c.Get("userId")
-	if !exists {
-		c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
-	}
-
-	accountId, exists := c.Get("accountId")
-	if !exists {
-		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("no accountId")))
-	}
 
 	storyId := c.Param("storyId")
 	if storyId == "" {
@@ -240,7 +195,7 @@ func (r *storyRoutes) Assign(c *gin.Context) {
 		return
 	}
 
-	hasAccess, err := r.cerberusClient.HasAccess(c, accountId.(string), userId.(string), storyId, "ChangeStoryAssignee")
+	hasAccess, err := r.cerberusClient.HasAccess(c, storyId, "ChangeStoryAssignee")
 	if err != nil || !hasAccess {
 		c.AbortWithStatusJSON(http.StatusForbidden, jsonError(err))
 		return

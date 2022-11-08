@@ -1,5 +1,5 @@
 import {BrowserRouter, Routes, Route} from "react-router-dom";
-import {AuthGuard} from "./context/AuthContext";
+import {AuthContext, AuthGuard} from "./context/AuthContext";
 import Login from "./components/login/Login";
 import Register from "./components/register/Register";
 import Navbar from "./components/navbar/Navbar";
@@ -11,10 +11,22 @@ import SettingsMenu from "./components/menu/SettingsMenu";
 import Settings from "./components/settings/Settings";
 import {SprintProvider} from "./components/projects/sprints/SprintContext";
 import {StoryProvider} from "./components/projects/sprints/stories/StoryContext";
+import {useContext, useEffect, useState} from "react";
+import {WsProvider} from "cerberus-reactjs";
 
 function App() {
+    const authCtx = useContext(AuthContext)
+    const [socketUrl, setSocketUrl] = useState("")
+
+    useEffect(() => {
+        if (authCtx.user != null) {
+            setSocketUrl(`ws://localhost:9000/api/token/${authCtx.user.cerberusToken}`) // TODO don't use query param for token
+        }
+    }, [authCtx])
+
   return (
       <BrowserRouter>
+          <WsProvider socketUrl={socketUrl}>
           <ProjectProvider>
               <SprintProvider>
                   <StoryProvider>
@@ -49,6 +61,7 @@ function App() {
                   </StoryProvider>
               </SprintProvider>
           </ProjectProvider>
+          </WsProvider>
       </BrowserRouter>
   );
 }

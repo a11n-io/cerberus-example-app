@@ -60,7 +60,7 @@ func (s *userService) Register(ctx context.Context, email, plainPassword, name s
 
 	// CERBERUS create account resource, user and role
 	log.Println("Creating Cerberus artifacts")
-	cerberusToken, err := s.cerberusClient.GetToken(ctx)
+	cerberusToken, err := s.cerberusClient.GetToken(ctx, account.Id, user.Id)
 	if err != nil {
 		return repositories.User{}, err
 	}
@@ -71,28 +71,28 @@ func (s *userService) Register(ctx context.Context, email, plainPassword, name s
 		return repositories.User{}, err
 	}
 
-	_, err = s.cerberusClient.CreateResource(context, account.Id, account.Id, "", "Account")
+	_, err = s.cerberusClient.CreateResource(context, account.Id, "", "Account")
 	if err != nil {
 		return repositories.User{}, err
 	}
 
-	_, err = s.cerberusClient.CreateUser(context, account.Id, user.Id, user.Email, user.Name)
+	_, err = s.cerberusClient.CreateUser(context, user.Id, user.Email, user.Name)
 	if err != nil {
 		return repositories.User{}, err
 	}
 
 	roleId := uuid.New().String()
-	_, err = s.cerberusClient.CreateRole(context, account.Id, roleId, "AccountAdministrator")
+	_, err = s.cerberusClient.CreateRole(context, roleId, "AccountAdministrator")
 	if err != nil {
 		return repositories.User{}, err
 	}
 
-	err = s.cerberusClient.AssignRole(context, account.Id, roleId, user.Id)
+	err = s.cerberusClient.AssignRole(context, roleId, user.Id)
 	if err != nil {
 		return repositories.User{}, err
 	}
 
-	err = s.cerberusClient.CreatePermission(context, account.Id, roleId, account.Id, []string{"ManageAccount"})
+	err = s.cerberusClient.CreatePermission(context, roleId, account.Id, []string{"ManageAccount"})
 	if err != nil {
 		return repositories.User{}, err
 	}
@@ -115,7 +115,7 @@ func (s *userService) Login(ctx context.Context, email string, password string) 
 	}
 
 	// get cerberus token
-	cerberusToken, err := s.cerberusClient.GetToken(ctx)
+	cerberusToken, err := s.cerberusClient.GetToken(ctx, user.AccountId, user.Id)
 	if err != nil {
 		return repositories.User{}, err
 	}
@@ -141,12 +141,12 @@ func (s *userService) Add(ctx context.Context, email, plainPassword, name, roleI
 		return repositories.User{}, err
 	}
 
-	_, err = s.cerberusClient.CreateUser(ctx, accountId.(string), user.Id, user.Email, user.Name)
+	_, err = s.cerberusClient.CreateUser(ctx, user.Id, user.Email, user.Name)
 	if err != nil {
 		return repositories.User{}, err
 	}
 
-	err = s.cerberusClient.AssignRole(ctx, accountId.(string), roleId, user.Id)
+	err = s.cerberusClient.AssignRole(ctx, roleId, user.Id)
 	if err != nil {
 		return repositories.User{}, err
 	}
@@ -161,7 +161,7 @@ func (s *userService) GetAll(ctx context.Context) (_ []cerberus.User, err error)
 		return []cerberus.User{}, fmt.Errorf("no accountId")
 	}
 
-	return s.cerberusClient.GetUsersForAccount(ctx, accountId.(string))
+	return s.cerberusClient.GetUsers(ctx)
 }
 
 func toClaims(user repositories.User, cerberusToken string) map[string]interface{} {

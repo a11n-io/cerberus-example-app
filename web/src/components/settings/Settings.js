@@ -12,7 +12,6 @@ export default function Settings() {
             <Route exact path="permissions" element={<Permissions
                 cerberusUrl={"http://localhost:8000/api/"}
                 cerberusToken={authCtx.user.cerberusToken}
-                accountId={authCtx.user.accountId}
                 resourceId={authCtx.user.accountId}
             />}/>
             <Route exact path="/" element={<SettingsDashboard/>}/>

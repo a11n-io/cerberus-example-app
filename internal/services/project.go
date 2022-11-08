@@ -36,12 +36,12 @@ func (s *projectService) Create(ctx context.Context, accountId, name, descriptio
 
 	project, err := s.repo.Create(accountId, name, description)
 
-	_, err = s.cerberusClient.CreateResource(ctx, accountId, project.Id, accountId, "Project")
+	_, err = s.cerberusClient.CreateResource(ctx, project.Id, accountId, "Project")
 	if err != nil {
 		return repositories.Project{}, err
 	}
 
-	err = s.cerberusClient.CreatePermission(ctx, accountId, userId.(string), project.Id, []string{"ManageProject"})
+	err = s.cerberusClient.CreatePermission(ctx, userId.(string), project.Id, []string{"ManageProject"})
 	if err != nil {
 		return repositories.Project{}, err
 	}

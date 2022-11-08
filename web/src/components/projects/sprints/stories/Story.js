@@ -37,7 +37,6 @@ export default function Story() {
             <Route exact path="permissions" element={<Permissions
                 cerberusUrl={"http://localhost:8000/api/"}
                 cerberusToken={authCtx.user.cerberusToken}
-                accountId={authCtx.user.accountId}
                 resourceId={storyCtx.story.id}
             />}/>
         </Routes>

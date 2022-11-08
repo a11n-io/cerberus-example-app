@@ -30,17 +30,13 @@ func (r *userRoutes) RegisterRoutes(rg *gin.RouterGroup) {
 }
 
 func (r *userRoutes) Add(c *gin.Context) {
-	userId, exists := c.Get("userId")
-	if !exists {
-		c.AbortWithStatusJSON(401, jsonError(fmt.Errorf("unauthorized")))
-	}
 
 	accountId, exists := c.Get("accountId")
 	if !exists {
 		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("no accountId")))
 	}
 
-	hasAccess, err := r.cerberusClient.HasAccess(c, accountId.(string), userId.(string), accountId.(string), "AddUser")
+	hasAccess, err := r.cerberusClient.HasAccess(c, accountId.(string), "AddUser")
 	if err != nil || !hasAccess {
 		c.AbortWithStatusJSON(http.StatusForbidden, jsonError(err))
 		return
