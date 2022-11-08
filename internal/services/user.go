@@ -60,7 +60,7 @@ func (s *userService) Register(ctx context.Context, email, plainPassword, name s
 
 	// CERBERUS create account resource, user and role
 	log.Println("Creating Cerberus artifacts")
-	cerberusToken, err := s.cerberusClient.GetToken(ctx, account.Id, user.Id)
+	cerberusToken, err := s.cerberusClient.GetUserToken(ctx, account.Id, user.Id)
 	if err != nil {
 		return repositories.User{}, err
 	}
@@ -115,7 +115,7 @@ func (s *userService) Login(ctx context.Context, email string, password string) 
 	}
 
 	// get cerberus token
-	cerberusToken, err := s.cerberusClient.GetToken(ctx, user.AccountId, user.Id)
+	cerberusToken, err := s.cerberusClient.GetUserToken(ctx, user.AccountId, user.Id)
 	if err != nil {
 		return repositories.User{}, err
 	}
