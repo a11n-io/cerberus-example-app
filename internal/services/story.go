@@ -47,7 +47,7 @@ func (s *storyService) Create(ctx context.Context, sprintId, description string)
 		return repositories.Story{}, err
 	}
 
-	err = s.cerberusClient.CreatePermission(ctx, userId.(string), story.Id, []string{"ManageStory"})
+	err = s.cerberusClient.CreatePermission(ctx, userId.(string), story.Id, []string{"CanManageSprint"})
 	if err != nil {
 		return repositories.Story{}, err
 	}

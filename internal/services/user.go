@@ -65,34 +65,34 @@ func (s *userService) Register(ctx context.Context, email, plainPassword, name s
 		return repositories.User{}, err
 	}
 
-	context := context.WithValue(ctx, "cerberusToken", cerberusToken)
-	_, err = s.cerberusClient.CreateAccount(context, account.Id)
+	cerberusContext := context.WithValue(ctx, "cerberusToken", cerberusToken)
+	_, err = s.cerberusClient.CreateAccount(cerberusContext, account.Id)
 	if err != nil {
 		return repositories.User{}, err
 	}
 
-	_, err = s.cerberusClient.CreateResource(context, account.Id, "", "Account")
+	_, err = s.cerberusClient.CreateResource(cerberusContext, account.Id, "", "Account")
 	if err != nil {
 		return repositories.User{}, err
 	}
 
-	_, err = s.cerberusClient.CreateUser(context, user.Id, user.Email, user.Name)
+	_, err = s.cerberusClient.CreateUser(cerberusContext, user.Id, user.Email, user.Name)
 	if err != nil {
 		return repositories.User{}, err
 	}
 
 	roleId := uuid.New().String()
-	_, err = s.cerberusClient.CreateRole(context, roleId, "AccountAdministrator")
+	_, err = s.cerberusClient.CreateRole(cerberusContext, roleId, "AccountAdministrator")
 	if err != nil {
 		return repositories.User{}, err
 	}
 
-	err = s.cerberusClient.AssignRole(context, roleId, user.Id)
+	err = s.cerberusClient.AssignRole(cerberusContext, roleId, user.Id)
 	if err != nil {
 		return repositories.User{}, err
 	}
 
-	err = s.cerberusClient.CreatePermission(context, roleId, account.Id, []string{"ManageAccount"})
+	err = s.cerberusClient.CreatePermission(cerberusContext, roleId, account.Id, []string{"CanManageAccount"})
 	if err != nil {
 		return repositories.User{}, err
 	}

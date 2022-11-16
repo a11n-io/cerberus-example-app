@@ -41,7 +41,7 @@ func (s *projectService) Create(ctx context.Context, accountId, name, descriptio
 		return repositories.Project{}, err
 	}
 
-	err = s.cerberusClient.CreatePermission(ctx, userId.(string), project.Id, []string{"ManageProject"})
+	err = s.cerberusClient.CreatePermission(ctx, userId.(string), project.Id, []string{"CanManageProject"})
 	if err != nil {
 		return repositories.Project{}, err
 	}
