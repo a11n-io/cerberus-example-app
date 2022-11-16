@@ -12,7 +12,7 @@ import Settings from "./components/settings/Settings";
 import {SprintProvider} from "./components/projects/sprints/SprintContext";
 import {StoryProvider} from "./components/projects/sprints/stories/StoryContext";
 import {useContext, useEffect, useState} from "react";
-import {WsProvider} from "cerberus-reactjs";
+import {CerberusProvider, WsProvider} from "cerberus-reactjs";
 
 function App() {
     const authCtx = useContext(AuthContext)
@@ -26,7 +26,7 @@ function App() {
 
   return (
       <BrowserRouter>
-          <WsProvider socketUrl={socketUrl}>
+          <CerberusProvider cerberusUrl="http://localhost:8000/api/" socketUrl={socketUrl}>
           <ProjectProvider>
               <SprintProvider>
                   <StoryProvider>
@@ -61,7 +61,7 @@ function App() {
                   </StoryProvider>
               </SprintProvider>
           </ProjectProvider>
-          </WsProvider>
+          </CerberusProvider>
       </BrowserRouter>
   );
 }

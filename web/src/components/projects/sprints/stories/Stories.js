@@ -6,7 +6,7 @@ import {Routes, Route, Link} from "react-router-dom";
 import CreateStory from "./CreateStory";
 import Story from "./Story";
 import {SprintContext} from "../SprintContext";
-import {AccessGuard, WsContext} from "cerberus-reactjs";
+import {AccessGuard} from "cerberus-reactjs";
 import {AuthContext} from "../../../../context/AuthContext";
 
 export default function Stories() {
@@ -23,7 +23,6 @@ function StoryList() {
     const [stories, setStories] = useState([])
     const authCtx = useContext(AuthContext)
     const sprintCtx = useContext(SprintContext)
-    const wsCtx = useContext(WsContext)
     const {get, loading} = useFetch("/api/")
     const [showCreate, setShowCreate] = useState(false)
 
@@ -60,7 +59,7 @@ function StoryList() {
             }
         </ul>
 
-        <AccessGuard wsContext={wsCtx} resourceId={sprintCtx.sprint.id} action="CreateStory">
+        <AccessGuard resourceId={sprintCtx.sprint.id} action="CreateStory">
             {
                 !showCreate && <Link to="" onClick={handleNewClicked}>New Story</Link>
             }

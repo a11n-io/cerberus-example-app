@@ -33,11 +33,7 @@ export default function Project() {
         <Routes>
             <Route path="sprints/*" element={<Sprints/>}/>
             <Route exact path="/" element={<ProjectDashboard/>}/>
-            <Route exact path="permissions" element={<Permissions
-                cerberusUrl={"http://localhost:8000/api/"}
-                cerberusToken={authCtx.user.cerberusToken}
-                resourceId={projectCtx.project.id}
-            />}/>
+            <Route exact path="permissions" element={<Permissions resourceId={projectCtx.project.id}/>}/>
         </Routes>
     </>
 }

@@ -6,9 +6,11 @@ import Loader from "../../uikit/Loader";
 import {useContext, useState} from "react";
 import {encode} from "base-64"
 import {AuthContext} from "../../context/AuthContext";
+import {CerberusContext} from "cerberus-reactjs";
 
 export default function Login() {
     const auth = useContext(AuthContext)
+    const cerberusCtx = useContext(CerberusContext)
     const navigate = useNavigate()
     const {post, loading} = useFetch("/")
     const [email, setEmail] = useState()
@@ -25,6 +27,7 @@ export default function Login() {
         }, {"Authorization": basicAuth})
             .then(r => {
                 auth.setUser(r)
+                cerberusCtx.setCerberusToken(r.cerberusToken)
                 navigate("/")
             })
             .catch(e => console.log(e))

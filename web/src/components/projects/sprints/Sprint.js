@@ -32,11 +32,7 @@ export default function Sprint() {
         <Routes>
             <Route path="stories/*" element={<Stories/>}/>
             <Route exact path="/" element={<Dashboard/>}/>
-            <Route exact path="permissions" element={<Permissions
-                cerberusUrl={"http://localhost:8000/api/"}
-                cerberusToken={authCtx.user.cerberusToken}
-                resourceId={sprintCtx.sprint.id}
-            />}/>
+            <Route exact path="permissions" element={<Permissions resourceId={sprintCtx.sprint.id}/>}/>
         </Routes>
     </>
 }

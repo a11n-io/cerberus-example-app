@@ -34,11 +34,7 @@ export default function Story() {
     return <>
         <Routes>
             <Route exact path="/" element={<Dashboard story={storyCtx.story} setStory={storyCtx.setStory}/>}/>
-            <Route exact path="permissions" element={<Permissions
-                cerberusUrl={"http://localhost:8000/api/"}
-                cerberusToken={authCtx.user.cerberusToken}
-                resourceId={storyCtx.story.id}
-            />}/>
+            <Route exact path="permissions" element={<Permissions resourceId={storyCtx.story.id}/>}/>
         </Routes>
     </>
 }
