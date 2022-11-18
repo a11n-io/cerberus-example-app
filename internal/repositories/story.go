@@ -7,9 +7,9 @@ import (
 )
 
 type StoryRepo interface {
-	Create(sprintId, description string) (Story, error)
+	Create(sprintId, description string, tx *sql.Tx) (Story, error)
 	FindBySprint(sprintId string) ([]Story, error)
-	Get(storyId string) (Story, error)
+	Get(storyId string, tx *sql.Tx) (Story, error)
 	Estimate(storyId string, estimate int) (Story, error)
 	ChangeStatus(storyId, status string) (Story, error)
 	Assign(storyId, userId string) (Story, error)
@@ -34,13 +34,34 @@ func NewStoryRepo(db *sql.DB) StoryRepo {
 	}
 }
 
-func (r *storyRepo) Create(sprintId, description string) (story Story, err error) {
+func (r *storyRepo) Create(sprintId, description string, tx *sql.Tx) (story Story, err error) {
 
-	tx, err := r.db.Begin()
+	if tx != nil {
+		return r.create(sprintId, description, tx)
+	}
+
+	tx, err = r.db.Begin()
 	if err != nil {
 		log.Println(err)
 		return
 	}
+
+	story, err = r.create(sprintId, description, tx)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	return
+}
+
+func (r *storyRepo) create(sprintId, description string, tx *sql.Tx) (story Story, err error) {
 	stmt, err := tx.Prepare("insert into story(id, sprint_id, estimation, description, status)" +
 		" values(?, ?, 0, ?, 'todo')")
 	if err != nil {
@@ -50,12 +71,6 @@ func (r *storyRepo) Create(sprintId, description string) (story Story, err error
 	defer stmt.Close()
 	id := uuid.New().String()
 	_, err = stmt.Exec(id, sprintId, description)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	err = tx.Commit()
 	if err != nil {
 		log.Println(err)
 		return
@@ -109,9 +124,34 @@ func (r *storyRepo) FindBySprint(sprintId string) (stories []Story, err error) {
 	return
 }
 
-func (r *storyRepo) Get(storyId string) (story Story, err error) {
+func (r *storyRepo) Get(storyId string, tx *sql.Tx) (story Story, err error) {
+	if tx != nil {
+		return r.get(storyId, tx)
+	}
 
-	stmt, err := r.db.Prepare("select sprint_id, estimation, description, status, user_id from story where id = ?")
+	tx, err = r.db.Begin()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	story, err = r.get(storyId, tx)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	return
+}
+
+func (r *storyRepo) get(storyId string, tx *sql.Tx) (story Story, err error) {
+	stmt, err := tx.Prepare("select sprint_id, estimation, description, status, user_id from story where id = ?")
 	if err != nil {
 		log.Println(err)
 		return

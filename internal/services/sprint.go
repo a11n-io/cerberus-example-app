@@ -1,6 +1,7 @@
 package services
 
 import (
+	"cerberus-example-app/internal/database"
 	"cerberus-example-app/internal/repositories"
 	"context"
 	"fmt"
@@ -16,14 +17,17 @@ type SprintService interface {
 }
 
 type sprintService struct {
+	txProvider     database.TxProvider
 	repo           repositories.SprintRepo
-	cerberusClient cerberus.Client
+	cerberusClient cerberus.CerberusClient
 }
 
 func NewSprintService(
+	txProvider database.TxProvider,
 	repo repositories.SprintRepo,
-	cerberusClient cerberus.Client) SprintService {
+	cerberusClient cerberus.CerberusClient) SprintService {
 	return &sprintService{
+		txProvider:     txProvider,
 		repo:           repo,
 		cerberusClient: cerberusClient,
 	}
@@ -36,22 +40,30 @@ func (s *sprintService) Create(ctx context.Context, projectId, goal string) (rep
 		return repositories.Sprint{}, fmt.Errorf("no userId")
 	}
 
-	sprint, err := s.repo.Create(projectId, goal)
+	tx, err := s.txProvider.GetTransaction()
 	if err != nil {
 		return repositories.Sprint{}, err
 	}
 
-	_, err = s.cerberusClient.CreateResource(ctx, sprint.Id, projectId, "Sprint")
+	sprint, err := s.repo.Create(projectId, goal, tx)
 	if err != nil {
+		if rbe := tx.Rollback(); rbe != nil {
+			err = fmt.Errorf("rollback error (%v) after %w", rbe, err)
+		}
 		return repositories.Sprint{}, err
 	}
 
-	err = s.cerberusClient.CreatePermission(ctx, userId.(string), sprint.Id, []string{"CanManageSprint"})
+	err = s.cerberusClient.Execute(ctx,
+		s.cerberusClient.CreateResourceCmd(sprint.Id, projectId, "Sprint"),
+		s.cerberusClient.CreatePermissionCmd(userId.(string), sprint.Id, []string{"CanManageSprint"}))
 	if err != nil {
+		if rbe := tx.Rollback(); rbe != nil {
+			err = fmt.Errorf("rollback error (%v) after %w", rbe, err)
+		}
 		return repositories.Sprint{}, err
 	}
 
-	return s.repo.Get(sprint.Id)
+	return sprint, tx.Commit()
 }
 
 func (s *sprintService) FindByProject(ctx context.Context, projectId string) ([]repositories.Sprint, error) {
@@ -59,7 +71,7 @@ func (s *sprintService) FindByProject(ctx context.Context, projectId string) ([]
 }
 
 func (s *sprintService) Get(ctx context.Context, sprintId string) (repositories.Sprint, error) {
-	return s.repo.Get(sprintId)
+	return s.repo.Get(sprintId, nil)
 }
 
 func (s *sprintService) Start(ctx context.Context, sprintId string) (repositories.Sprint, error) {
@@ -67,7 +79,7 @@ func (s *sprintService) Start(ctx context.Context, sprintId string) (repositorie
 	if err != nil {
 		return repositories.Sprint{}, err
 	}
-	return s.repo.Get(sprintId)
+	return s.repo.Get(sprintId, nil)
 }
 
 func (s *sprintService) End(ctx context.Context, sprintId string) (repositories.Sprint, error) {
@@ -75,5 +87,5 @@ func (s *sprintService) End(ctx context.Context, sprintId string) (repositories.
 	if err != nil {
 		return repositories.Sprint{}, err
 	}
-	return s.repo.Get(sprintId)
+	return s.repo.Get(sprintId, nil)
 }

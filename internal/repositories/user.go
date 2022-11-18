@@ -8,7 +8,7 @@ import (
 )
 
 type UserRepo interface {
-	Save(accountId, email, plainPassword, name string) (User, error)
+	Save(accountId, email, plainPassword, name string, tx *sql.Tx) (User, error)
 	FindOneByEmailAndPassword(email string, password string) (User, error)
 	FindAll(accountId string) ([]User, error)
 }
@@ -32,7 +32,7 @@ func NewUserRepo(db *sql.DB) UserRepo {
 	}
 }
 
-func (r *userRepo) Save(accountId, email, plainPassword, name string) (user User, err error) {
+func (r *userRepo) Save(accountId, email, plainPassword, name string, tx *sql.Tx) (user User, err error) {
 
 	encryptedPassword, err := encryptPassword(plainPassword)
 	if err != nil {
@@ -40,11 +40,33 @@ func (r *userRepo) Save(accountId, email, plainPassword, name string) (user User
 		return
 	}
 
-	tx, err := r.db.Begin()
+	if tx != nil {
+		return r.save(accountId, email, encryptedPassword, name, tx)
+	}
+
+	tx, err = r.db.Begin()
 	if err != nil {
 		log.Println(err)
 		return
 	}
+
+	user, err = r.save(accountId, email, encryptedPassword, name, tx)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	return
+}
+
+func (r *userRepo) save(accountId, email, encryptedPassword, name string, tx *sql.Tx) (user User, err error) {
+
 	stmt, err := tx.Prepare("insert into user(id, account_id, email, password, name) values(?, ?, ?, ?, ?)")
 	if err != nil {
 		log.Println(err)
@@ -58,19 +80,12 @@ func (r *userRepo) Save(accountId, email, plainPassword, name string) (user User
 		return
 	}
 
-	err = tx.Commit()
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
 	user = User{
 		Id:        id,
 		AccountId: accountId,
 		Name:      name,
 		Email:     email,
 	}
-
 	return
 }
 

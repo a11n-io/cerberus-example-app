@@ -15,10 +15,10 @@ type ProjectData struct {
 
 type projectRoutes struct {
 	service        services.ProjectService
-	cerberusClient cerberus.Client
+	cerberusClient cerberus.CerberusClient
 }
 
-func NewProjectRoutes(service services.ProjectService, cerberusClient cerberus.Client) Routable {
+func NewProjectRoutes(service services.ProjectService, cerberusClient cerberus.CerberusClient) Routable {
 	return &projectRoutes{service: service, cerberusClient: cerberusClient}
 }
 

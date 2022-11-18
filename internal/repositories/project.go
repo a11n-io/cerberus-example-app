@@ -7,7 +7,7 @@ import (
 )
 
 type ProjectRepo interface {
-	Create(accountId, name, description string) (Project, error)
+	Create(accountId, name, description string, tx *sql.Tx) (Project, error)
 	FindByAccount(accountId string) ([]Project, error)
 	Get(projectId string) (Project, error)
 }
@@ -29,13 +29,34 @@ func NewProjectRepo(db *sql.DB) ProjectRepo {
 	}
 }
 
-func (r *projectRepo) Create(accountId, name, description string) (project Project, err error) {
+func (r *projectRepo) Create(accountId, name, description string, tx *sql.Tx) (project Project, err error) {
 
-	tx, err := r.db.Begin()
+	if tx != nil {
+		return r.create(accountId, name, description, tx)
+	}
+
+	tx, err = r.db.Begin()
 	if err != nil {
 		log.Println(err)
 		return
 	}
+
+	project, err = r.create(accountId, name, description, tx)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	return
+}
+
+func (r *projectRepo) create(accountId, name, description string, tx *sql.Tx) (project Project, err error) {
 	stmt, err := tx.Prepare("insert into project(id, account_id, name, description) values(?, ?, ?, ?)")
 	if err != nil {
 		log.Println(err)
@@ -49,19 +70,12 @@ func (r *projectRepo) Create(accountId, name, description string) (project Proje
 		return
 	}
 
-	err = tx.Commit()
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
 	project = Project{
 		Id:          id,
 		AccountId:   accountId,
 		Name:        name,
 		Description: description,
 	}
-
 	return
 }
 

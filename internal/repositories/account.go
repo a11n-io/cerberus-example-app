@@ -7,7 +7,7 @@ import (
 )
 
 type AccountRepo interface {
-	Create() (Account, error)
+	Create(tx *sql.Tx) (Account, error)
 }
 
 type Account struct {
@@ -24,13 +24,29 @@ func NewAccountRepo(db *sql.DB) AccountRepo {
 	}
 }
 
-func (r *accountRepo) Create() (account Account, err error) {
+func (r *accountRepo) Create(tx *sql.Tx) (account Account, err error) {
+	if tx != nil {
+		return r.create(tx)
+	}
 
-	tx, err := r.db.Begin()
+	tx, err = r.db.Begin()
 	if err != nil {
 		log.Println(err)
 		return
 	}
+
+	account, err = r.create(tx)
+
+	err = tx.Commit()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	return
+}
+
+func (r *accountRepo) create(tx *sql.Tx) (account Account, err error) {
 	stmt, err := tx.Prepare("insert into account(id) values(?)")
 	if err != nil {
 		log.Println(err)
@@ -44,15 +60,8 @@ func (r *accountRepo) Create() (account Account, err error) {
 		return
 	}
 
-	err = tx.Commit()
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
 	account = Account{
 		Id: id,
 	}
-
 	return
 }

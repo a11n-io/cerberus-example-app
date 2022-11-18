@@ -15,10 +15,10 @@ type SprintData struct {
 
 type sprintRoutes struct {
 	service        services.SprintService
-	cerberusClient cerberus.Client
+	cerberusClient cerberus.CerberusClient
 }
 
-func NewSprintRoutes(service services.SprintService, cerberusClient cerberus.Client) Routable {
+func NewSprintRoutes(service services.SprintService, cerberusClient cerberus.CerberusClient) Routable {
 	return &sprintRoutes{service: service, cerberusClient: cerberusClient}
 }
 

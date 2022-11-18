@@ -1,6 +1,7 @@
 package services
 
 import (
+	"cerberus-example-app/internal/database"
 	"cerberus-example-app/internal/repositories"
 	"context"
 	"fmt"
@@ -14,14 +15,17 @@ type ProjectService interface {
 }
 
 type projectService struct {
+	txProvider     database.TxProvider
 	repo           repositories.ProjectRepo
-	cerberusClient cerberus.Client
+	cerberusClient cerberus.CerberusClient
 }
 
 func NewProjectService(
+	txProvider database.TxProvider,
 	repo repositories.ProjectRepo,
-	cerberusClient cerberus.Client) ProjectService {
+	cerberusClient cerberus.CerberusClient) ProjectService {
 	return &projectService{
+		txProvider:     txProvider,
 		repo:           repo,
 		cerberusClient: cerberusClient,
 	}
@@ -34,19 +38,30 @@ func (s *projectService) Create(ctx context.Context, accountId, name, descriptio
 		return repositories.Project{}, fmt.Errorf("no userId")
 	}
 
-	project, err := s.repo.Create(accountId, name, description)
-
-	_, err = s.cerberusClient.CreateResource(ctx, project.Id, accountId, "Project")
+	tx, err := s.txProvider.GetTransaction()
 	if err != nil {
 		return repositories.Project{}, err
 	}
 
-	err = s.cerberusClient.CreatePermission(ctx, userId.(string), project.Id, []string{"CanManageProject"})
+	project, err := s.repo.Create(accountId, name, description, tx)
 	if err != nil {
+		if rbe := tx.Rollback(); rbe != nil {
+			err = fmt.Errorf("rollback error (%v) after %w", rbe, err)
+		}
 		return repositories.Project{}, err
 	}
 
-	return project, nil
+	err = s.cerberusClient.Execute(ctx,
+		s.cerberusClient.CreateResourceCmd(project.Id, accountId, "Project"),
+		s.cerberusClient.CreatePermissionCmd(userId.(string), project.Id, []string{"CanManageProject"}))
+	if err != nil {
+		if rbe := tx.Rollback(); rbe != nil {
+			err = fmt.Errorf("rollback error (%v) after %w", rbe, err)
+		}
+		return repositories.Project{}, err
+	}
+
+	return project, tx.Commit()
 }
 
 func (s *projectService) FindAll(ctx context.Context, accountId string) ([]repositories.Project, error) {

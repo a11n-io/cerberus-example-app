@@ -75,3 +75,4 @@
 (arp "CanManageAccount" "Account")
 (arp "CanManageProject" "Project")
 (arp "CanManageSprint" "Sprint")
+(arp "CanManageSprint" "Story")

@@ -17,11 +17,15 @@ type UserData struct {
 
 type userRoutes struct {
 	userService    services.UserService
-	cerberusClient cerberus.Client
+	cerberusClient cerberus.CerberusClient
 }
 
-func NewUserRoutes(userService services.UserService, cerberusClient cerberus.Client) Routable {
-	return &userRoutes{userService: userService, cerberusClient: cerberusClient}
+func NewUserRoutes(
+	userService services.UserService,
+	cerberusClient cerberus.CerberusClient) Routable {
+	return &userRoutes{
+		userService:    userService,
+		cerberusClient: cerberusClient}
 }
 
 func (r *userRoutes) RegisterRoutes(rg *gin.RouterGroup) {

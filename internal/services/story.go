@@ -1,6 +1,7 @@
 package services
 
 import (
+	"cerberus-example-app/internal/database"
 	"cerberus-example-app/internal/repositories"
 	"context"
 	"fmt"
@@ -17,14 +18,17 @@ type StoryService interface {
 }
 
 type storyService struct {
+	txProvider     database.TxProvider
 	repo           repositories.StoryRepo
-	cerberusClient cerberus.Client
+	cerberusClient cerberus.CerberusClient
 }
 
 func NewStoryService(
+	txProvider database.TxProvider,
 	repo repositories.StoryRepo,
-	cerberusClient cerberus.Client) StoryService {
+	cerberusClient cerberus.CerberusClient) StoryService {
 	return &storyService{
+		txProvider:     txProvider,
 		repo:           repo,
 		cerberusClient: cerberusClient,
 	}
@@ -37,22 +41,30 @@ func (s *storyService) Create(ctx context.Context, sprintId, description string)
 		return repositories.Story{}, fmt.Errorf("no userId")
 	}
 
-	story, err := s.repo.Create(sprintId, description)
+	tx, err := s.txProvider.GetTransaction()
 	if err != nil {
 		return repositories.Story{}, err
 	}
 
-	_, err = s.cerberusClient.CreateResource(ctx, story.Id, sprintId, "Story")
+	story, err := s.repo.Create(sprintId, description, tx)
 	if err != nil {
+		if rbe := tx.Rollback(); rbe != nil {
+			err = fmt.Errorf("rollback error (%v) after %w", rbe, err)
+		}
 		return repositories.Story{}, err
 	}
 
-	err = s.cerberusClient.CreatePermission(ctx, userId.(string), story.Id, []string{"CanManageSprint"})
+	err = s.cerberusClient.Execute(ctx,
+		s.cerberusClient.CreateResourceCmd(story.Id, sprintId, "Story"),
+		s.cerberusClient.CreatePermissionCmd(userId.(string), story.Id, []string{"CanManageSprint"}))
 	if err != nil {
+		if rbe := tx.Rollback(); rbe != nil {
+			err = fmt.Errorf("rollback error (%v) after %w", rbe, err)
+		}
 		return repositories.Story{}, err
 	}
 
-	return s.repo.Get(story.Id)
+	return story, tx.Commit()
 }
 
 func (s *storyService) FindBySprint(ctx context.Context, sprintId string) ([]repositories.Story, error) {
@@ -60,7 +72,7 @@ func (s *storyService) FindBySprint(ctx context.Context, sprintId string) ([]rep
 }
 
 func (s *storyService) Get(ctx context.Context, storyId string) (repositories.Story, error) {
-	return s.repo.Get(storyId)
+	return s.repo.Get(storyId, nil)
 }
 
 func (s *storyService) Assign(ctx context.Context, storyId, userId string) (repositories.Story, error) {
@@ -68,7 +80,7 @@ func (s *storyService) Assign(ctx context.Context, storyId, userId string) (repo
 	if err != nil {
 		return repositories.Story{}, err
 	}
-	return s.repo.Get(storyId)
+	return s.repo.Get(storyId, nil)
 }
 
 func (s *storyService) Estimate(ctx context.Context, storyId string, estimation int) (repositories.Story, error) {
@@ -76,7 +88,7 @@ func (s *storyService) Estimate(ctx context.Context, storyId string, estimation 
 	if err != nil {
 		return repositories.Story{}, err
 	}
-	return s.repo.Get(storyId)
+	return s.repo.Get(storyId, nil)
 }
 
 func (s *storyService) ChangeStatus(ctx context.Context, storyId, status string) (repositories.Story, error) {
@@ -84,5 +96,5 @@ func (s *storyService) ChangeStatus(ctx context.Context, storyId, status string)
 	if err != nil {
 		return repositories.Story{}, err
 	}
-	return s.repo.Get(storyId)
+	return s.repo.Get(storyId, nil)
 }

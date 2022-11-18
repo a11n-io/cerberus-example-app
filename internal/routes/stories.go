@@ -18,10 +18,10 @@ type StoryData struct {
 
 type storyRoutes struct {
 	service        services.StoryService
-	cerberusClient cerberus.Client
+	cerberusClient cerberus.CerberusClient
 }
 
-func NewStoryRoutes(service services.StoryService, cerberusClient cerberus.Client) Routable {
+func NewStoryRoutes(service services.StoryService, cerberusClient cerberus.CerberusClient) Routable {
 	return &storyRoutes{service: service, cerberusClient: cerberusClient}
 }
 

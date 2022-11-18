@@ -25,19 +25,7 @@ func main() {
 	// env config
 	_env := env.GetEnv(".env.dev")
 
-	cerberusClient := cerberus.NewClient(fmt.Sprintf("http://%s:%s", _env.CERBERUS_HOST, _env.CERBERUS_PORT),
-		_env.CERBERUS_API_KEY, _env.CERBERUS_API_SECRET)
-
-	//cerberusToken, err := cerberusClient.GetToken(ctx)
-	//if err != nil {
-	//	log.Fatalf("could not get cerberus token %v", err.Error())
-	//}
-	//
-	//context := context.WithValue(ctx, "cerberusToken", cerberusToken)
-	//err = cerberusClient.Migrate(context, "(CreateResourceType \"RTRT\" \"\")")
-	//if err != nil {
-	//	log.Fatalf("could not migrate cerberus %v", err.Error())
-	//}
+	cerberusClient := cerberus.NewClient(fmt.Sprintf("http://%s:%s", _env.CERBERUS_HOST, _env.CERBERUS_PORT), _env.CERBERUS_API_KEY, _env.CERBERUS_API_SECRET)
 
 	db, err := database.NewDB()
 	utils.PanicOnError(err)
@@ -73,7 +61,10 @@ func main() {
 		log.Println("sqlite migration done")
 	}
 
+	txProvider := database.NewTxProvider(db)
+
 	userService := services.NewUserService(
+		txProvider,
 		repositories.NewUserRepo(db),
 		repositories.NewAccountRepo(db),
 		_env.JWT_SECRET, _env.SALT_ROUNDS, cerberusClient)
@@ -83,9 +74,9 @@ func main() {
 	privateRoutes := privateRoutes(
 		cerberusClient,
 		userService,
-		services.NewProjectService(repositories.NewProjectRepo(db), cerberusClient),
-		services.NewSprintService(repositories.NewSprintRepo(db), cerberusClient),
-		services.NewStoryService(repositories.NewStoryRepo(db), cerberusClient))
+		services.NewProjectService(txProvider, repositories.NewProjectRepo(db), cerberusClient),
+		services.NewSprintService(txProvider, repositories.NewSprintRepo(db), cerberusClient),
+		services.NewStoryService(txProvider, repositories.NewStoryRepo(db), cerberusClient))
 
 	// Run server with context
 	webserver := server.NewWebServer(ctx, _env.APP_PORT, _env.JWT_SECRET, publicRoutes, privateRoutes)
@@ -100,7 +91,7 @@ func publicRoutes(
 }
 
 func privateRoutes(
-	cerberusClient cerberus.Client,
+	cerberusClient cerberus.CerberusClient,
 	userService services.UserService,
 	projectService services.ProjectService,
 	sprintService services.SprintService,

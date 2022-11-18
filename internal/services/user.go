@@ -1,6 +1,7 @@
 package services
 
 import (
+	"cerberus-example-app/internal/database"
 	"cerberus-example-app/internal/repositories"
 	"cerberus-example-app/internal/services/jwtutils"
 	"context"
@@ -18,20 +19,23 @@ type UserService interface {
 }
 
 type userService struct {
+	txProvider     database.TxProvider
 	userRepo       repositories.UserRepo
 	accountRepo    repositories.AccountRepo
 	jwtSecret      string
 	saltRounds     int
-	cerberusClient cerberus.Client
+	cerberusClient cerberus.CerberusClient
 }
 
 func NewUserService(
+	txProvider database.TxProvider,
 	userRepo repositories.UserRepo,
 	accountRepo repositories.AccountRepo,
 	jwtSecret string,
 	saltRounds int,
-	cerberusClient cerberus.Client) UserService {
+	cerberusClient cerberus.CerberusClient) UserService {
 	return &userService{
+		txProvider:     txProvider,
 		userRepo:       userRepo,
 		accountRepo:    accountRepo,
 		jwtSecret:      jwtSecret,
@@ -48,13 +52,24 @@ func (s *userService) Register(ctx context.Context, email, plainPassword, name s
 
 	log.Println("Register", email, plainPassword, name)
 
-	account, err := s.accountRepo.Create()
+	tx, err := s.txProvider.GetTransaction()
 	if err != nil {
 		return repositories.User{}, err
 	}
 
-	user, err := s.userRepo.Save(account.Id, email, plainPassword, name)
+	account, err := s.accountRepo.Create(tx)
 	if err != nil {
+		if rbe := tx.Rollback(); rbe != nil {
+			err = fmt.Errorf("rollback error (%v) after %w", rbe, err)
+		}
+		return repositories.User{}, err
+	}
+
+	user, err := s.userRepo.Save(account.Id, email, plainPassword, name, tx)
+	if err != nil {
+		if rbe := tx.Rollback(); rbe != nil {
+			err = fmt.Errorf("rollback error (%v) after %w", rbe, err)
+		}
 		return repositories.User{}, err
 	}
 
@@ -62,48 +77,40 @@ func (s *userService) Register(ctx context.Context, email, plainPassword, name s
 	log.Println("Creating Cerberus artifacts")
 	cerberusToken, err := s.cerberusClient.GetUserToken(ctx, account.Id, user.Id)
 	if err != nil {
+		if rbe := tx.Rollback(); rbe != nil {
+			err = fmt.Errorf("rollback error (%v) after %w", rbe, err)
+		}
 		return repositories.User{}, err
 	}
 
 	cerberusContext := context.WithValue(ctx, "cerberusToken", cerberusToken)
-	_, err = s.cerberusClient.CreateAccount(cerberusContext, account.Id)
-	if err != nil {
-		return repositories.User{}, err
-	}
-
-	_, err = s.cerberusClient.CreateResource(cerberusContext, account.Id, "", "Account")
-	if err != nil {
-		return repositories.User{}, err
-	}
-
-	_, err = s.cerberusClient.CreateUser(cerberusContext, user.Id, user.Email, user.Name)
-	if err != nil {
-		return repositories.User{}, err
-	}
 
 	roleId := uuid.New().String()
-	_, err = s.cerberusClient.CreateRole(cerberusContext, roleId, "AccountAdministrator")
-	if err != nil {
-		return repositories.User{}, err
-	}
 
-	err = s.cerberusClient.AssignRole(cerberusContext, roleId, user.Id)
+	err = s.cerberusClient.Execute(cerberusContext,
+		s.cerberusClient.CreateAccountCmd(account.Id),
+		s.cerberusClient.CreateResourceCmd(account.Id, "", "Account"),
+		s.cerberusClient.CreateUserCmd(user.Id, user.Email, user.Name),
+		s.cerberusClient.CreateRoleCmd(roleId, "AccountAdministrator"),
+		s.cerberusClient.AssignRoleCmd(roleId, user.Id),
+		s.cerberusClient.CreatePermissionCmd(roleId, account.Id, []string{"CanManageAccount"}))
 	if err != nil {
-		return repositories.User{}, err
-	}
-
-	err = s.cerberusClient.CreatePermission(cerberusContext, roleId, account.Id, []string{"CanManageAccount"})
-	if err != nil {
+		if rbe := tx.Rollback(); rbe != nil {
+			err = fmt.Errorf("rollback error (%v) after %w", rbe, err)
+		}
 		return repositories.User{}, err
 	}
 
 	subject := user.Id
 	token, err := jwtutils.Sign(subject, toClaims(user, cerberusToken), s.jwtSecret)
 	if err != nil {
+		if rbe := tx.Rollback(); rbe != nil {
+			err = fmt.Errorf("rollback error (%v) after %w", rbe, err)
+		}
 		return repositories.User{}, err
 	}
 
-	return userWithTokens(user, token, cerberusToken), nil
+	return userWithTokens(user, token, cerberusToken), tx.Commit()
 }
 
 // Login finds a user and returns that user with a jwt token
@@ -136,22 +143,30 @@ func (s *userService) Add(ctx context.Context, email, plainPassword, name, roleI
 		return repositories.User{}, fmt.Errorf("no accountId")
 	}
 
-	user, err := s.userRepo.Save(accountId.(string), email, plainPassword, name)
+	tx, err := s.txProvider.GetTransaction()
 	if err != nil {
 		return repositories.User{}, err
 	}
 
-	_, err = s.cerberusClient.CreateUser(ctx, user.Id, user.Email, user.Name)
+	user, err := s.userRepo.Save(accountId.(string), email, plainPassword, name, tx)
 	if err != nil {
+		if rbe := tx.Rollback(); rbe != nil {
+			err = fmt.Errorf("rollback error (%v) after %w", rbe, err)
+		}
 		return repositories.User{}, err
 	}
 
-	err = s.cerberusClient.AssignRole(ctx, roleId, user.Id)
+	err = s.cerberusClient.Execute(ctx,
+		s.cerberusClient.CreateUserCmd(user.Id, user.Email, user.Name),
+		s.cerberusClient.AssignRoleCmd(roleId, user.Id))
 	if err != nil {
+		if rbe := tx.Rollback(); rbe != nil {
+			err = fmt.Errorf("rollback error (%v) after %w", rbe, err)
+		}
 		return repositories.User{}, err
 	}
 
-	return user, nil
+	return user, tx.Commit()
 }
 
 func (s *userService) GetAll(ctx context.Context) (_ []cerberus.User, err error) {
