@@ -1,6 +1,7 @@
 package services
 
 import (
+	"cerberus-example-app/internal/common"
 	"cerberus-example-app/internal/database"
 	"cerberus-example-app/internal/repositories"
 	"context"
@@ -53,9 +54,7 @@ func (s *sprintService) Create(ctx context.Context, projectId, goal string) (rep
 		return repositories.Sprint{}, err
 	}
 
-	err = s.cerberusClient.Execute(ctx,
-		s.cerberusClient.CreateResourceCmd(sprint.Id, projectId, "Sprint"),
-		s.cerberusClient.CreatePermissionCmd(userId.(string), sprint.Id, []string{"CanManageSprint"}))
+	err = s.cerberusClient.Execute(ctx, s.cerberusClient.CreateResourceCmd(sprint.Id, projectId, common.Sprint_RT))
 	if err != nil {
 		if rbe := tx.Rollback(); rbe != nil {
 			err = fmt.Errorf("rollback error (%v) after %w", rbe, err)

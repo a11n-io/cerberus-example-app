@@ -5,19 +5,17 @@ import useFetch from "../../../hooks/useFetch";
 import Loader from "../../../uikit/Loader";
 import Btn from "../../../uikit/Btn";
 import Stories from "./stories/Stories";
-import {Permissions} from "cerberus-reactjs";
-import {AuthContext} from "../../../context/AuthContext";
+import {AccessGuard, Permissions} from "cerberus-reactjs";
 
 export default function Sprint() {
     const params = useParams()
     const sprintCtx = useContext(SprintContext)
-    const authCtx = useContext(AuthContext)
     const {get, loading} = useFetch("/api/")
 
     useEffect(() => {
         get("sprints/"+params.id)
             .then(d => sprintCtx.setSprint(d))
-            .catch(e => console.log(e))
+            .catch(e => console.error(e))
     }, [])
 
     if (loading) {
@@ -32,7 +30,7 @@ export default function Sprint() {
         <Routes>
             <Route path="stories/*" element={<Stories/>}/>
             <Route exact path="/" element={<Dashboard/>}/>
-            <Route exact path="permissions" element={<Permissions resourceId={sprintCtx.sprint.id}/>}/>
+            <Route exact path="permissions" element={<SprintPermissions/>}/>
         </Routes>
     </>
 }
@@ -75,10 +73,20 @@ function ChangeSprint(props) {
                     sprintCtx.setSprint(d)
                 }
             })
-            .catch(e => console.log(e))
+            .catch(e => console.error(e))
     }
 
     return <>
         <Btn onClick={handleButtonClicked}>{start ? "Start" : "End"} sprint</Btn>
+    </>
+}
+
+function SprintPermissions() {
+    const sprintCtx = useContext(SprintContext)
+
+    return <>
+        <AccessGuard resourceId={sprintCtx.sprint.id} action="ManageSprintPermissions">
+            <Permissions resourceId={sprintCtx.sprint.id}/>
+        </AccessGuard>
     </>
 }

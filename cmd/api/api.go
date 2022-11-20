@@ -32,6 +32,8 @@ func main() {
 	defer func() {
 		utils.PanicOnError(db.Close())
 	}()
+	_, err = db.Exec("PRAGMA foreign_keys=ON")
+	utils.PanicOnError(err)
 
 	cdriver, err := cerberusmigrate.WithInstance(cerberusClient, &cerberusmigrate.Config{})
 	if err != nil {

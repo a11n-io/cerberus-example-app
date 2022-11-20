@@ -12,7 +12,7 @@ import Settings from "./components/settings/Settings";
 import {SprintProvider} from "./components/projects/sprints/SprintContext";
 import {StoryProvider} from "./components/projects/sprints/stories/StoryContext";
 import {useContext, useEffect, useState} from "react";
-import {CerberusProvider, WsProvider} from "cerberus-reactjs";
+import {CerberusProvider} from "cerberus-reactjs";
 
 function App() {
     const authCtx = useContext(AuthContext)

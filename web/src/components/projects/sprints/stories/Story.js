@@ -1,4 +1,3 @@
-
 import {Route, Routes, useParams} from "react-router-dom";
 import {useContext, useEffect, useState} from "react";
 import useFetch from "../../../../hooks/useFetch";
@@ -6,21 +5,16 @@ import Loader from "../../../../uikit/Loader";
 import {Form} from "react-bootstrap";
 import {StoryContext} from "./StoryContext";
 import {Permissions} from "cerberus-reactjs";
-import {AuthContext} from "../../../../context/AuthContext";
 
 export default function Story() {
     const params = useParams()
     const storyCtx = useContext(StoryContext)
-    const authCtx = useContext(AuthContext)
     const {get, loading} = useFetch("/api/")
 
     useEffect(() => {
-
-        console.log("Story ID", params.id)
-
         get("stories/"+params.id)
             .then(d => storyCtx.setStory(d))
-            .catch(e => console.log(e))
+            .catch(e => console.error(e))
     }, [])
 
     if (loading) {
@@ -34,7 +28,6 @@ export default function Story() {
     return <>
         <Routes>
             <Route exact path="/" element={<Dashboard story={storyCtx.story} setStory={storyCtx.setStory}/>}/>
-            <Route exact path="permissions" element={<Permissions resourceId={storyCtx.story.id}/>}/>
         </Routes>
     </>
 }
@@ -48,14 +41,10 @@ function Dashboard(props) {
     const [assignee, setAssignee] = useState("")
     const {story, setStory} = props
 
-
-    console.log("Story ID Dash", story.id)
-
-
     useEffect(() => {
         get("users")
             .then(d => setUsers(d))
-            .catch(e => console.log(e))
+            .catch(e => console.error(e))
     }, [])
 
     useEffect(() => {
@@ -77,7 +66,7 @@ function Dashboard(props) {
                     setStory(d)
                 }
             })
-            .catch(e => console.log(e))
+            .catch(e => console.error(e))
     }
 
     function handleStatusChange(e) {
@@ -89,7 +78,7 @@ function Dashboard(props) {
                     setStory(d)
                 }
             })
-            .catch(e => console.log(e))
+            .catch(e => console.error(e))
     }
 
     function handleAssigneeChange(e) {
@@ -101,7 +90,7 @@ function Dashboard(props) {
                     setStory(d)
                 }
             })
-            .catch(e => console.log(e))
+            .catch(e => console.error(e))
     }
 
     if (loading) {

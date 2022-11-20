@@ -24,7 +24,7 @@ export default function CreateProject() {
                     navigate("/projects/" + r.id)
                 }
             })
-            .catch(e => console.log(e))
+            .catch(e => console.error(e))
     }
 
     function handleNameChanged(e) {

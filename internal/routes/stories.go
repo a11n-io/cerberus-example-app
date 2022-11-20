@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"cerberus-example-app/internal/common"
 	"cerberus-example-app/internal/services"
 	"fmt"
 	cerberus "github.com/a11n-io/go-cerberus"
@@ -44,7 +45,7 @@ func (r *storyRoutes) Create(c *gin.Context) {
 		return
 	}
 
-	hasAccess, err := r.cerberusClient.HasAccess(c, sprintId, "CreateStory")
+	hasAccess, err := r.cerberusClient.HasAccess(c, sprintId, common.CreateStory_A)
 	if err != nil || !hasAccess {
 		c.AbortWithStatusJSON(http.StatusForbidden, jsonError(err))
 		return
@@ -96,7 +97,7 @@ func (r *storyRoutes) Get(c *gin.Context) {
 		return
 	}
 
-	hasAccess, err := r.cerberusClient.HasAccess(c, storyId, "ReadStory")
+	hasAccess, err := r.cerberusClient.HasAccess(c, storyId, common.ReadStory_A)
 	if err != nil || !hasAccess {
 		c.AbortWithStatusJSON(http.StatusForbidden, jsonError(err))
 		return
@@ -122,7 +123,7 @@ func (r *storyRoutes) Estimate(c *gin.Context) {
 		return
 	}
 
-	hasAccess, err := r.cerberusClient.HasAccess(c, storyId, "EstimateStory")
+	hasAccess, err := r.cerberusClient.HasAccess(c, storyId, common.EstimateStory_A)
 	if err != nil || !hasAccess {
 		c.AbortWithStatusJSON(http.StatusForbidden, jsonError(err))
 		return
@@ -161,7 +162,7 @@ func (r *storyRoutes) ChangeStatus(c *gin.Context) {
 		return
 	}
 
-	hasAccess, err := r.cerberusClient.HasAccess(c, storyId, "ChangeStoryStatus")
+	hasAccess, err := r.cerberusClient.HasAccess(c, storyId, common.ChangeStoryStatus_A)
 	if err != nil || !hasAccess {
 		c.AbortWithStatusJSON(http.StatusForbidden, jsonError(err))
 		return
@@ -195,7 +196,7 @@ func (r *storyRoutes) Assign(c *gin.Context) {
 		return
 	}
 
-	hasAccess, err := r.cerberusClient.HasAccess(c, storyId, "ChangeStoryAssignee")
+	hasAccess, err := r.cerberusClient.HasAccess(c, storyId, common.ChangeStoryAssignee_A)
 	if err != nil || !hasAccess {
 		c.AbortWithStatusJSON(http.StatusForbidden, jsonError(err))
 		return

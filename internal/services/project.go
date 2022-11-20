@@ -1,6 +1,7 @@
 package services
 
 import (
+	"cerberus-example-app/internal/common"
 	"cerberus-example-app/internal/database"
 	"cerberus-example-app/internal/repositories"
 	"context"
@@ -12,6 +13,7 @@ type ProjectService interface {
 	Create(ctx context.Context, accountId, name, description string) (repositories.Project, error)
 	FindAll(ctx context.Context, accountId string) ([]repositories.Project, error)
 	Get(ctx context.Context, projectId string) (repositories.Project, error)
+	Delete(ctx context.Context, projectId string) error
 }
 
 type projectService struct {
@@ -51,9 +53,7 @@ func (s *projectService) Create(ctx context.Context, accountId, name, descriptio
 		return repositories.Project{}, err
 	}
 
-	err = s.cerberusClient.Execute(ctx,
-		s.cerberusClient.CreateResourceCmd(project.Id, accountId, "Project"),
-		s.cerberusClient.CreatePermissionCmd(userId.(string), project.Id, []string{"CanManageProject"}))
+	err = s.cerberusClient.Execute(ctx, s.cerberusClient.CreateResourceCmd(project.Id, accountId, common.Project_RT))
 	if err != nil {
 		if rbe := tx.Rollback(); rbe != nil {
 			err = fmt.Errorf("rollback error (%v) after %w", rbe, err)
@@ -70,4 +70,8 @@ func (s *projectService) FindAll(ctx context.Context, accountId string) ([]repos
 
 func (s *projectService) Get(ctx context.Context, projectId string) (repositories.Project, error) {
 	return s.repo.Get(projectId)
+}
+
+func (s *projectService) Delete(ctx context.Context, projectId string) error {
+	return s.repo.Delete(projectId)
 }

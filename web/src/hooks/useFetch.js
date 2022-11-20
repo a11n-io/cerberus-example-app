@@ -19,8 +19,6 @@ export default function useFetch(baseUrl) {
         return new Promise((resolve, reject) => {
             setLoading(true);
 
-            console.log("GET " + baseUrl + url, hdrs)
-
             fetch(baseUrl + url, {
                 method: "get",
                 headers: hdrs

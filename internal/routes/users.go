@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"cerberus-example-app/internal/common"
 	"cerberus-example-app/internal/services"
 	"fmt"
 	cerberus "github.com/a11n-io/go-cerberus"
@@ -12,7 +13,7 @@ type UserData struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	Name     string `json:"name"`
-	Role     string `json:"role"`
+	RoleId   string `json:"roleId"`
 }
 
 type userRoutes struct {
@@ -40,7 +41,7 @@ func (r *userRoutes) Add(c *gin.Context) {
 		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("no accountId")))
 	}
 
-	hasAccess, err := r.cerberusClient.HasAccess(c, accountId.(string), "AddUser")
+	hasAccess, err := r.cerberusClient.HasAccess(c, accountId.(string), common.AddUser_A)
 	if err != nil || !hasAccess {
 		c.AbortWithStatusJSON(http.StatusForbidden, jsonError(err))
 		return
@@ -58,7 +59,7 @@ func (r *userRoutes) Add(c *gin.Context) {
 		userData.Email,
 		userData.Password,
 		userData.Name,
-		userData.Role,
+		userData.RoleId,
 	)
 	if err != nil {
 		c.AbortWithStatusJSON(500, jsonError(err))

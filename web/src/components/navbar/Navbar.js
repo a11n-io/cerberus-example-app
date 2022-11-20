@@ -14,7 +14,7 @@ export default function Navbar() {
     return <>
         <nav className="navbar">
             <NavLink to="/" className="nav-brand">
-                Cerberus Example App
+                Acme Project Manager
             </NavLink>
             <ul>
                 <AuthGuard>

@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"cerberus-example-app/internal/common"
 	"cerberus-example-app/internal/services"
 	"fmt"
 	cerberus "github.com/a11n-io/go-cerberus"
@@ -26,6 +27,7 @@ func (r *projectRoutes) RegisterRoutes(rg *gin.RouterGroup) {
 	rg.POST("accounts/:accountId/projects", func(c *gin.Context) { r.Create(c) })
 	rg.GET("accounts/:accountId/projects", func(c *gin.Context) { r.FindAll(c) })
 	rg.GET("projects/:projectId", func(c *gin.Context) { r.Get(c) })
+	rg.DELETE("projects/:projectId", func(c *gin.Context) { r.Delete(c) })
 }
 
 func (r *projectRoutes) Create(c *gin.Context) {
@@ -38,7 +40,7 @@ func (r *projectRoutes) Create(c *gin.Context) {
 		return
 	}
 
-	hasAccess, err := r.cerberusClient.HasAccess(c, accountId, "CreateProject")
+	hasAccess, err := r.cerberusClient.HasAccess(c, accountId, common.CreateProject_A)
 	if err != nil || !hasAccess {
 		c.AbortWithStatusJSON(http.StatusForbidden, jsonError(err))
 		return
@@ -95,7 +97,7 @@ func (r *projectRoutes) Get(c *gin.Context) {
 		return
 	}
 
-	hasAccess, err := r.cerberusClient.HasAccess(c, projectId, "ReadProject")
+	hasAccess, err := r.cerberusClient.HasAccess(c, projectId, common.ReadProject_A)
 	if err != nil || !hasAccess {
 		c.AbortWithStatusJSON(http.StatusForbidden, jsonError(err))
 		return
@@ -111,4 +113,30 @@ func (r *projectRoutes) Get(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, jsonData(project))
+}
+
+func (r *projectRoutes) Delete(c *gin.Context) {
+
+	projectId := c.Param("projectId")
+	if projectId == "" {
+		c.AbortWithStatusJSON(400, jsonError(fmt.Errorf("missing projectId")))
+		return
+	}
+
+	hasAccess, err := r.cerberusClient.HasAccess(c, projectId, common.DeleteProject_A)
+	if err != nil || !hasAccess {
+		c.AbortWithStatusJSON(http.StatusForbidden, jsonError(err))
+		return
+	}
+
+	err = r.service.Delete(
+		c,
+		projectId,
+	)
+	if err != nil {
+		c.AbortWithStatusJSON(500, jsonError(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, jsonData(true))
 }

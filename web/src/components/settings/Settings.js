@@ -1,27 +1,134 @@
-import {Route, Routes} from "react-router-dom";
-import {useContext} from "react";
+import {useContext, useEffect, useState} from "react";
 import {AuthContext} from "../../context/AuthContext";
-import {Permissions} from "cerberus-reactjs";
-import {ProjectContext} from "../projects/ProjectContext";
+import {AccessGuard, Permissions, Roles, Users} from "cerberus-reactjs";
+import {Button, Form, Tab, Tabs} from "react-bootstrap";
+import Loader from "../../uikit/Loader";
+import useFetch from "../../hooks/useFetch";
 
 export default function Settings() {
-    const authCtx = useContext(AuthContext)
 
     return <>
-        <Routes>
-            <Route exact path="permissions" element={<Permissions
-                cerberusUrl={"http://localhost:8000/api/"}
-                cerberusToken={authCtx.user.cerberusToken}
-                resourceId={authCtx.user.accountId}
-            />}/>
-            <Route exact path="/" element={<SettingsDashboard/>}/>
-        </Routes>
+        <Tabs defaultActiveKey='users' className='mb-3'>
+            <Tab eventKey='users' title='Users'>
+                <Users NoUserSelectedComponent={AddUser}/>
+            </Tab>
+            <Tab eventKey='roles' title='Roles'>
+                <Roles />
+            </Tab>
+            <Tab eventKey='permissions' title='Permissions'>
+                <AccountPermissions />
+            </Tab>
+        </Tabs>
     </>
 }
 
-function SettingsDashboard() {
+function AddUser() {
+    const authCtx = useContext(AuthContext)
+    const { post, loading } = useFetch('/api/')
+    const {get} = useFetch('http://localhost:8000/api/') // get roles from cerberus
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+    const [name, setName] = useState("")
+    const [roles, setRoles] = useState([])
+    const [selectedRole, setSelectedRole] = useState("")
+
+    useEffect(() => {
+        get(`roles`, {
+            "Authorization": "Bearer " + authCtx.user.cerberusToken
+        })
+            .then(r => setRoles(r))
+            .catch(e => console.error(e))
+    }, [])
+
+    function handleEmailChanged(e) {
+        setEmail(e.target.value)
+    }
+
+    function handlePasswordChanged(e) {
+        setPassword(e.target.value)
+    }
+
+    function handleNameChanged(e) {
+        setName(e.target.value)
+    }
+
+    function handleRoleSelected(e) {
+        setSelectedRole(e.target.value)
+    }
+
+    function handleFormSubmit(e) {
+        e.preventDefault()
+        post('users', {
+            email: email,
+            password: password,
+            name: name,
+            roleId: selectedRole
+        })
+            .then((r) => {
+
+            })
+            .catch((e) => console.error(e))
+    }
+
+    if (loading) {
+        return <Loader />
+    }
 
     return <>
-        Settings
+        <AccessGuard resourceId={authCtx.user.accountId} action="AddUser">
+            <Form onSubmit={handleFormSubmit}>
+                <Form.Group className='mb-3'>
+                    <Form.Label>Email</Form.Label>
+                    <Form.Control
+                        type='text'
+                        placeholder='Enter email'
+                        onChange={handleEmailChanged}
+                    />
+                </Form.Group>
+                <Form.Group className='mb-3'>
+                    <Form.Label>Password</Form.Label>
+                    <Form.Control
+                        type='text'
+                        placeholder='Enter password'
+                        onChange={handlePasswordChanged}
+                    />
+                </Form.Group>
+                <Form.Group className='mb-3'>
+                    <Form.Label>Name</Form.Label>
+                    <Form.Control
+                        type='text'
+                        placeholder='Enter name'
+                        onChange={handleNameChanged}
+                    />
+                </Form.Group>
+                <Form.Group className='mb-3'>
+                    <Form.Label>Role</Form.Label>
+                    <Form.Select onChange={handleRoleSelected}>
+                        <option value="">Select a role</option>
+                        {
+                            roles.map(role => {
+                                return (
+                                    <option key={role.id} value={role.id}>{role.displayName}</option>
+                                )
+                            })
+                        }
+                    </Form.Select>
+                </Form.Group>
+                <Button disabled={email === "" || password === "" || name === "" || selectedRole === ""}
+                        variant='primary' type='submit'>
+                    Add
+                </Button>
+            </Form>
+        </AccessGuard>
+    </>
+}
+
+function AccountPermissions() {
+    const authCtx = useContext(AuthContext)
+
+    return <>
+        <AccessGuard resourceId={authCtx.user.accountId} action="ManageAccountPermissions">
+            <Permissions resourceId={authCtx.user.accountId}/>
+        </AccessGuard>
     </>
 }

@@ -1,4 +1,3 @@
-
 import {useContext, useEffect, useState} from "react";
 import useFetch from "../../hooks/useFetch";
 import {AuthContext} from "../../context/AuthContext";
@@ -30,7 +29,7 @@ function ProjectList() {
     useEffect(() => {
         get("accounts/"+authCtx.user.accountId+"/projects")
             .then(d => setProjects(d))
-            .catch(e => console.log(e))
+            .catch(e => console.error(e))
     }, [])
 
     function handleNewClicked(e) {
@@ -49,7 +48,12 @@ function ProjectList() {
                 projects.map(project => {
                     return (
                         <li className="nav-item" key={project.id}>
-                            <Link to={`/projects/${project.id}`}>{project.name}</Link>
+                            <AccessGuard
+                                resourceId={project.id}
+                                action="ReadProject"
+                                otherwise={<span>{project.name}</span>}>
+                                <Link to={`/projects/${project.id}`}>{project.name}</Link>
+                            </AccessGuard>
                         </li>
                     )
                 })

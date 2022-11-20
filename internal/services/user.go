@@ -1,6 +1,7 @@
 package services
 
 import (
+	"cerberus-example-app/internal/common"
 	"cerberus-example-app/internal/database"
 	"cerberus-example-app/internal/repositories"
 	"cerberus-example-app/internal/services/jwtutils"
@@ -89,11 +90,11 @@ func (s *userService) Register(ctx context.Context, email, plainPassword, name s
 
 	err = s.cerberusClient.Execute(cerberusContext,
 		s.cerberusClient.CreateAccountCmd(account.Id),
-		s.cerberusClient.CreateResourceCmd(account.Id, "", "Account"),
+		s.cerberusClient.CreateResourceCmd(account.Id, "", common.Account_RT),
 		s.cerberusClient.CreateUserCmd(user.Id, user.Email, user.Name),
-		s.cerberusClient.CreateRoleCmd(roleId, "AccountAdministrator"),
+		s.cerberusClient.CreateRoleCmd(roleId, common.AccountAdministrator_R),
 		s.cerberusClient.AssignRoleCmd(roleId, user.Id),
-		s.cerberusClient.CreatePermissionCmd(roleId, account.Id, []string{"CanManageAccount"}))
+		s.cerberusClient.CreatePermissionCmd(roleId, account.Id, []string{common.CanManageAccount_P}))
 	if err != nil {
 		if rbe := tx.Rollback(); rbe != nil {
 			err = fmt.Errorf("rollback error (%v) after %w", rbe, err)

@@ -6,6 +6,7 @@ import Loader from "../../uikit/Loader";
 import StoryMenu from "./StoryMenu";
 import {ProjectContext} from "../projects/ProjectContext";
 import {SprintContext} from "../projects/sprints/SprintContext";
+import {AccessGuard} from "cerberus-reactjs";
 
 export default function SprintMenu() {
     const projectCtx = useContext(ProjectContext)
@@ -30,12 +31,18 @@ function Menu(props) {
 
     return <>
         <div className="navmenu">
-            <Link to={`/projects/${project.id}/sprints`}>{project.name} Sprints</Link>
+            <Link to={`/projects/${project.id}/sprints`}>
+                <i className="mr-1">&#8592;</i>
+                <i>{project.name} Sprints</i>
+            </Link>
             <p>{sprint.number}</p>
             <ul>
-                <li className="nav-item">
-                    <NavLink end to={`permissions`}>Permissions</NavLink>
-                </li>
+                <AccessGuard resourceId={sprint.id} action="ManageSprintPermissions">
+                    <li className="nav-item">
+                        <NavLink end to={`permissions`}>Permissions</NavLink>
+                    </li>
+                </AccessGuard>
+
                 <li className="nav-item">
                     <NavLink end to={`stories`}>Stories</NavLink>
                 </li>

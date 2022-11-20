@@ -10,6 +10,7 @@ type ProjectRepo interface {
 	Create(accountId, name, description string, tx *sql.Tx) (Project, error)
 	FindByAccount(accountId string) ([]Project, error)
 	Get(projectId string) (Project, error)
+	Delete(projectId string) error
 }
 
 type Project struct {
@@ -130,6 +131,19 @@ func (r *projectRepo) Get(projectId string) (project Project, err error) {
 		Name:        name,
 		Description: description,
 	}
+
+	return
+}
+
+func (r *projectRepo) Delete(projectId string) (err error) {
+
+	stmt, err := r.db.Prepare("delete from project where id = ?")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(projectId)
 
 	return
 }

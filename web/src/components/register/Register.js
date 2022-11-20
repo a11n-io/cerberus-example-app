@@ -20,10 +20,9 @@ export default function Register() {
             password: password
         })
             .then(r => {
-                console.log(r)
                 navigate("/login")
             })
-            .catch(e => console.log(e))
+            .catch(e => console.error(e))
     }
 
     function handleNameChanged(e) {

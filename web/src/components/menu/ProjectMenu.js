@@ -4,6 +4,7 @@ import {Link, NavLink, Route, Routes} from "react-router-dom";
 import SprintMenu from "./SprintMenu";
 import {SprintProvider} from "../projects/sprints/SprintContext";
 import {ProjectContext} from "../projects/ProjectContext";
+import {AccessGuard} from "cerberus-reactjs";
 
 export default function ProjectMenu() {
     const projectCtx = useContext(ProjectContext)
@@ -26,12 +27,19 @@ function Menu(props) {
 
     return (
         <div className="navmenu">
-            <Link to={`/projects`}>Projects</Link>
+
+            <Link to={`/projects`}>
+                <i className="mr-1">&#8592;</i>
+                <i>Projects</i>
+            </Link>
             <p>{project.name}</p>
             <ul>
-                <li className="nav-item">
-                    <NavLink end to={`/projects/${project.id}/permissions`}>Permissions</NavLink>
-                </li>
+                <AccessGuard resourceId={project.id} action="ManageProjectPermissions">
+                    <li className="nav-item">
+                        <NavLink end to={`/projects/${project.id}/permissions`}>Permissions</NavLink>
+                    </li>
+                </AccessGuard>
+
                 <li className="nav-item">
                     <NavLink end to={`/projects/${project.id}/sprints`}>Sprints</NavLink>
                 </li>

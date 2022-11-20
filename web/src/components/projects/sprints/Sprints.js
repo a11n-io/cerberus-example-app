@@ -1,4 +1,3 @@
-
 import {useContext, useEffect, useState} from "react";
 import useFetch from "../../../hooks/useFetch";
 import Loader from "../../../uikit/Loader";
@@ -6,7 +5,6 @@ import {Routes, Route, Link} from "react-router-dom";
 import {ProjectContext} from "../ProjectContext";
 import Sprint from "./Sprint";
 import CreateSprint from "./CreateSprint";
-import {AuthContext} from "../../../context/AuthContext";
 import {AccessGuard} from "cerberus-reactjs";
 
 export default function Sprints() {
@@ -21,7 +19,6 @@ export default function Sprints() {
 
 function SprintList() {
     const [sprints, setSprints] = useState([])
-    const authCtx = useContext(AuthContext)
     const projectCtx = useContext(ProjectContext)
     const {get, loading} = useFetch("/api/")
     const [showCreate, setShowCreate] = useState(false)
@@ -33,7 +30,7 @@ function SprintList() {
                     setSprints(d)
                 }
             })
-            .catch(e => console.log(e))
+            .catch(e => console.error(e))
     }, [])
 
     function handleNewClicked(e) {
@@ -52,7 +49,12 @@ function SprintList() {
                 sprints.map(sprint => {
                     return (
                         <li className="nav-item" key={sprint.id}>
-                            <Link to={`${sprint.id}`}>{sprint.sprintNumber}: {sprint.goal}</Link>
+                            <AccessGuard
+                                resourceId={sprint.id}
+                                action="ReadSprint"
+                                otherwise={<span>{sprint.sprintNumber}: {sprint.goal}</span>}>
+                                <Link to={`${sprint.id}`}>{sprint.sprintNumber}: {sprint.goal}</Link>
+                            </AccessGuard>
                         </li>
                     )
                 })

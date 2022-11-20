@@ -1,5 +1,4 @@
 import {useContext, useState} from "react";
-import {ProjectContext} from "../../ProjectContext";
 import useFetch from "../../../../hooks/useFetch";
 import Loader from "../../../../uikit/Loader";
 import Input from "../../../../uikit/Input";
@@ -22,7 +21,7 @@ export default function CreateStory(props) {
                     props.setShowCreate(false)
                 }
             })
-            .catch(e => console.log(e))
+            .catch(e => console.error(e))
     }
 
     function handleDescriptionChanged(e) {

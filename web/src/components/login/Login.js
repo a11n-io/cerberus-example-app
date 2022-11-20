@@ -30,7 +30,7 @@ export default function Login() {
                 cerberusCtx.setCerberusToken(r.cerberusToken)
                 navigate("/")
             })
-            .catch(e => console.log(e))
+            .catch(e => console.error(e))
     }
 
     function handleEmailChanged(e) {

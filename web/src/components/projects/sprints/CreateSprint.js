@@ -21,7 +21,7 @@ export default function CreateSprint(props) {
                     props.setShowCreate(false)
                 }
             })
-            .catch(e => console.log(e))
+            .catch(e => console.error(e))
     }
 
     function handleGoalChanged(e) {

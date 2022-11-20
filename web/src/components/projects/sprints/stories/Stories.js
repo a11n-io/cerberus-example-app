@@ -1,4 +1,3 @@
-
 import {useContext, useEffect, useState} from "react";
 import useFetch from "../../../../hooks/useFetch";
 import Loader from "../../../../uikit/Loader";
@@ -7,7 +6,6 @@ import CreateStory from "./CreateStory";
 import Story from "./Story";
 import {SprintContext} from "../SprintContext";
 import {AccessGuard} from "cerberus-reactjs";
-import {AuthContext} from "../../../../context/AuthContext";
 
 export default function Stories() {
 
@@ -21,7 +19,6 @@ export default function Stories() {
 
 function StoryList() {
     const [stories, setStories] = useState([])
-    const authCtx = useContext(AuthContext)
     const sprintCtx = useContext(SprintContext)
     const {get, loading} = useFetch("/api/")
     const [showCreate, setShowCreate] = useState(false)
@@ -33,7 +30,7 @@ function StoryList() {
                     setStories(d)
                 }
             })
-            .catch(e => console.log(e))
+            .catch(e => console.error(e))
     }, [])
 
     function handleNewClicked(e) {
@@ -52,7 +49,12 @@ function StoryList() {
                 stories.map(story => {
                     return (
                         <li className="nav-item" key={story.id}>
-                            <Link to={`${story.id}`}>{story.description}</Link>
+                            <AccessGuard
+                                resourceId={story.id}
+                                action="ReadStory"
+                                otherwise={<span>{story.description}</span>}>
+                                <Link to={`${story.id}`}>{story.description}</Link>
+                            </AccessGuard>
                         </li>
                     )
                 })

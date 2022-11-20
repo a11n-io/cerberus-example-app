@@ -18,13 +18,11 @@ export default function StoryMenu() {
 
     return <>
         <div className="navmenu">
-            <Link to={`/projects/${projectCtx.project.id}/sprints/${sprintCtx.sprint.id}/stories`}>{sprintCtx.sprint.number} Stories</Link>
+            <Link to={`/projects/${projectCtx.project.id}/sprints/${sprintCtx.sprint.id}/stories`}>
+                <i className="mr-1">&#8592;</i>
+                <i>{sprintCtx.sprint.number} Stories</i>
+            </Link>
             <p>{storyCtx.story.description}</p>
-            <ul>
-                <li className="nav-item">
-                    <NavLink end to={`permissions`}>Permissions</NavLink>
-                </li>
-            </ul>
 
         </div>
 
