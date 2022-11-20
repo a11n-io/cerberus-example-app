@@ -127,7 +127,7 @@ function AccountPermissions() {
     const authCtx = useContext(AuthContext)
 
     return <>
-        <AccessGuard resourceId={authCtx.user.accountId} action="ManageAccountPermissions">
+        <AccessGuard resourceId={authCtx.user.accountId} action="ReadAccountPermissions">
             <Permissions resourceId={authCtx.user.accountId}/>
         </AccessGuard>
     </>

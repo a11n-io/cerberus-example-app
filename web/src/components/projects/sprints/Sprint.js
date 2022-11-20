@@ -85,7 +85,7 @@ function SprintPermissions() {
     const sprintCtx = useContext(SprintContext)
 
     return <>
-        <AccessGuard resourceId={sprintCtx.sprint.id} action="ManageSprintPermissions">
+        <AccessGuard resourceId={sprintCtx.sprint.id} action="ReadSprintPermissions">
             <Permissions resourceId={sprintCtx.sprint.id}/>
         </AccessGuard>
     </>

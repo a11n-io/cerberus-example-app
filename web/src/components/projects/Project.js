@@ -71,7 +71,7 @@ function ProjectPermissions() {
     const projectCtx = useContext(ProjectContext)
 
     return <>
-        <AccessGuard resourceId={projectCtx.project.id} action="ManageProjectPermissions">
+        <AccessGuard resourceId={projectCtx.project.id} action="ReadProjectPermissions">
             <Permissions resourceId={projectCtx.project.id}/>
         </AccessGuard>
     </>

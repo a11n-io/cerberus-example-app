@@ -34,7 +34,7 @@ function Menu(props) {
             </Link>
             <p>{project.name}</p>
             <ul>
-                <AccessGuard resourceId={project.id} action="ManageProjectPermissions">
+                <AccessGuard resourceId={project.id} action="ReadProjectPermissions">
                     <li className="nav-item">
                         <NavLink end to={`/projects/${project.id}/permissions`}>Permissions</NavLink>
                     </li>

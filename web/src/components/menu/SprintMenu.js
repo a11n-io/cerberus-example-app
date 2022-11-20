@@ -37,7 +37,7 @@ function Menu(props) {
             </Link>
             <p>{sprint.number}</p>
             <ul>
-                <AccessGuard resourceId={sprint.id} action="ManageSprintPermissions">
+                <AccessGuard resourceId={sprint.id} action="ReadSprintPermissions">
                     <li className="nav-item">
                         <NavLink end to={`permissions`}>Permissions</NavLink>
                     </li>
