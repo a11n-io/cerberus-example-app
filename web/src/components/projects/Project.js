@@ -72,7 +72,7 @@ function ProjectPermissions() {
 
     return <>
         <AccessGuard resourceId={projectCtx.project.id} action="ReadProjectPermissions">
-            <Permissions resourceId={projectCtx.project.id}/>
+            <Permissions resourceId={projectCtx.project.id} changeAction="ChangeProjectPermissions"/>
         </AccessGuard>
     </>
 }

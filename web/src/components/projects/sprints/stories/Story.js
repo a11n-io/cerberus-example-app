@@ -4,7 +4,7 @@ import useFetch from "../../../../hooks/useFetch";
 import Loader from "../../../../uikit/Loader";
 import {Form} from "react-bootstrap";
 import {StoryContext} from "./StoryContext";
-import {Permissions} from "cerberus-reactjs";
+import {AccessGuard, Permissions, useAccess} from "cerberus-reactjs";
 
 export default function Story() {
     const params = useParams()
@@ -28,6 +28,7 @@ export default function Story() {
     return <>
         <Routes>
             <Route exact path="/" element={<Dashboard story={storyCtx.story} setStory={storyCtx.setStory}/>}/>
+            <Route exact path="permissions" element={<StoryPermissions/>}/>
         </Routes>
     </>
 }
@@ -39,7 +40,14 @@ function Dashboard(props) {
     const [estimate, setEstimate] = useState(0)
     const [status, setStatus] = useState("")
     const [assignee, setAssignee] = useState("")
+    const [estimateAccess, setEstimateAccess] = useState(false)
+    const [statusAccess, setStatusAccess] = useState(false)
+    const [assigneeAccess, setAssigneeAccess] = useState(false)
     const {story, setStory} = props
+
+    useAccess(story.id, "EstimateStory", setEstimateAccess)
+    useAccess(story.id, "ChangeStoryStatus", setStatusAccess)
+    useAccess(story.id, "ChangeStoryAssignee", setAssigneeAccess)
 
     useEffect(() => {
         get("users")
@@ -104,11 +112,11 @@ function Dashboard(props) {
         <Form className="mb-5">
             <Form.Group className="mb-3">
                 <Form.Label>Estimate</Form.Label>
-                <Form.Control type="number" value={estimate} onChange={handleEstimateChange} onBlur={handleEstimateBlur}/>
+                <Form.Control disabled={!estimateAccess} type="number" value={estimate} onChange={handleEstimateChange} onBlur={handleEstimateBlur}/>
             </Form.Group>
             <Form.Group className="mb-3">
                 <Form.Label>Status</Form.Label>
-                <Form.Select value={status} onChange={handleStatusChange}>
+                <Form.Select disabled={!statusAccess} value={status} onChange={handleStatusChange}>
                     <option value="todo">todo</option>
                     <option value="busy">busy</option>
                     <option value="done">done</option>
@@ -116,7 +124,7 @@ function Dashboard(props) {
             </Form.Group>
             <Form.Group className="mb-3">
                 <Form.Label>Assignee</Form.Label>
-                <Form.Select value={assignee} onChange={handleAssigneeChange}>
+                <Form.Select disabled={!assigneeAccess} value={assignee} onChange={handleAssigneeChange}>
                     {
                         users.map(user => {
                             return (
@@ -127,5 +135,15 @@ function Dashboard(props) {
                 </Form.Select>
             </Form.Group>
         </Form>
+    </>
+}
+
+function StoryPermissions() {
+    const storyCtx = useContext(StoryContext)
+
+    return <>
+        <AccessGuard resourceId={storyCtx.story.id} action="ReadStoryPermissions">
+            <Permissions resourceId={storyCtx.story.id} changeAction="ChangeStoryPermissions"/>
+        </AccessGuard>
     </>
 }

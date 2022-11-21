@@ -128,7 +128,7 @@ function AccountPermissions() {
 
     return <>
         <AccessGuard resourceId={authCtx.user.accountId} action="ReadAccountPermissions">
-            <Permissions resourceId={authCtx.user.accountId}/>
+            <Permissions resourceId={authCtx.user.accountId} changeAction="ChangeAccountPermissions"/>
         </AccessGuard>
     </>
 }

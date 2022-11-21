@@ -53,7 +53,10 @@ function SprintList() {
                                 resourceId={sprint.id}
                                 action="ReadSprint"
                                 otherwise={<span>{sprint.sprintNumber}: {sprint.goal}</span>}>
-                                <Link to={`${sprint.id}`}>{sprint.sprintNumber}: {sprint.goal}</Link>
+                                <Link to={`${sprint.id}`}>
+                                    <i>{sprint.sprintNumber}: {sprint.goal}</i>
+                                    <i className="m-1">&#8594;</i>
+                                </Link>
                             </AccessGuard>
                         </li>
                     )

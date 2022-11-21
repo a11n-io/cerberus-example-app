@@ -53,7 +53,10 @@ function StoryList() {
                                 resourceId={story.id}
                                 action="ReadStory"
                                 otherwise={<span>{story.description}</span>}>
-                                <Link to={`${story.id}`}>{story.description}</Link>
+                                <Link to={`${story.id}`}>
+                                    <i>{story.description}</i>
+                                    <i className="m-1">&#8594;</i>
+                                </Link>
                             </AccessGuard>
                         </li>
                     )

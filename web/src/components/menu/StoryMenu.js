@@ -6,6 +6,7 @@ import Loader from "../../uikit/Loader";
 import {ProjectContext} from "../projects/ProjectContext";
 import {SprintContext} from "../projects/sprints/SprintContext";
 import {StoryContext} from "../projects/sprints/stories/StoryContext";
+import {AccessGuard} from "cerberus-reactjs";
 
 export default function StoryMenu() {
     const projectCtx = useContext(ProjectContext)
@@ -24,6 +25,11 @@ export default function StoryMenu() {
             </Link>
             <p>{storyCtx.story.description}</p>
 
+            <AccessGuard resourceId={storyCtx.story.id} action="ReadStoryPermissions">
+                <li className="nav-item">
+                    <NavLink end to={`permissions`}>Permissions</NavLink>
+                </li>
+            </AccessGuard>
         </div>
 
     </>

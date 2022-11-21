@@ -52,7 +52,10 @@ function ProjectList() {
                                 resourceId={project.id}
                                 action="ReadProject"
                                 otherwise={<span>{project.name}</span>}>
-                                <Link to={`/projects/${project.id}`}>{project.name}</Link>
+                                <Link to={`/projects/${project.id}`}>
+                                    <i>{project.name}</i>
+                                    <i className="m-1">&#8594;</i>
+                                </Link>
                             </AccessGuard>
                         </li>
                     )

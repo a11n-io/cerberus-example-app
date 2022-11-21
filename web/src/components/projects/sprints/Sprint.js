@@ -77,7 +77,9 @@ function ChangeSprint(props) {
     }
 
     return <>
-        <Btn onClick={handleButtonClicked}>{start ? "Start" : "End"} sprint</Btn>
+        <AccessGuard resourceId={sprintCtx.sprint.id} action="StartSprint">
+            <Btn onClick={handleButtonClicked}>{start ? "Start" : "End"} sprint</Btn>
+        </AccessGuard>
     </>
 }
 
@@ -86,7 +88,7 @@ function SprintPermissions() {
 
     return <>
         <AccessGuard resourceId={sprintCtx.sprint.id} action="ReadSprintPermissions">
-            <Permissions resourceId={sprintCtx.sprint.id}/>
+            <Permissions resourceId={sprintCtx.sprint.id} changeAction="ChangeSprintPermissions"/>
         </AccessGuard>
     </>
 }
