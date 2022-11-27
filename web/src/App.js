@@ -20,13 +20,13 @@ function App() {
 
     useEffect(() => {
         if (authCtx.user != null) {
-            setSocketUrl(`ws://localhost:9000/api/token/${authCtx.user.cerberusToken}`) // TODO don't use query param for token
+            setSocketUrl(`${process.env.REACT_APP_CERBERUS_WS_HOST}/api/token/${authCtx.user.cerberusToken}`) // TODO don't use query param for token
         }
     }, [authCtx])
 
   return (
       <BrowserRouter>
-          <CerberusProvider cerberusUrl="http://localhost:8000/api/" socketUrl={socketUrl}>
+          <CerberusProvider apiUrl={`${process.env.REACT_APP_CERBERUS_API_HOST}/api/`} socketUrl={socketUrl}>
           <ProjectProvider>
               <SprintProvider>
                   <StoryProvider>

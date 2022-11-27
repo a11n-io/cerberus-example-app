@@ -1,6 +1,6 @@
 import {useContext, useEffect, useState} from "react";
 import {AuthContext} from "../../context/AuthContext";
-import {AccessGuard, Permissions, Roles, Users} from "cerberus-reactjs";
+import {AccessGuard, Permissions, Roles, Users, RequiredRoles} from "cerberus-reactjs";
 import {Button, Form, Tab, Tabs} from "react-bootstrap";
 import Loader from "../../uikit/Loader";
 import useFetch from "../../hooks/useFetch";
@@ -14,6 +14,9 @@ export default function Settings() {
             </Tab>
             <Tab eventKey='roles' title='Roles'>
                 <Roles />
+            </Tab>
+            <Tab eventKey='requiredroles' title='Required Roles'>
+                <RequiredRoles />
             </Tab>
             <Tab eventKey='permissions' title='Permissions'>
                 <AccountPermissions />
