@@ -1,5 +1,5 @@
 import {BrowserRouter, Routes, Route} from "react-router-dom";
-import {AuthContext, AuthGuard} from "./context/AuthContext";
+import {AuthGuard} from "./context/AuthContext";
 import Login from "./components/login/Login";
 import Register from "./components/register/Register";
 import Navbar from "./components/navbar/Navbar";
@@ -11,22 +11,13 @@ import SettingsMenu from "./components/menu/SettingsMenu";
 import Settings from "./components/settings/Settings";
 import {SprintProvider} from "./components/projects/sprints/SprintContext";
 import {StoryProvider} from "./components/projects/sprints/stories/StoryContext";
-import {useContext, useEffect, useState} from "react";
 import {CerberusProvider} from "cerberus-reactjs";
 
 function App() {
-    const authCtx = useContext(AuthContext)
-    const [socketUrl, setSocketUrl] = useState("")
-
-    useEffect(() => {
-        if (authCtx.user != null) {
-            setSocketUrl(`${process.env.REACT_APP_CERBERUS_WS_HOST}/api/token/${authCtx.user.cerberusToken}`) // TODO don't use query param for token
-        }
-    }, [authCtx])
 
   return (
       <BrowserRouter>
-          <CerberusProvider apiUrl={`${process.env.REACT_APP_CERBERUS_API_HOST}/api/`} socketUrl={socketUrl}>
+          <CerberusProvider apiHost={process.env.REACT_APP_CERBERUS_API_HOST} socketHost={process.env.REACT_APP_CERBERUS_WS_HOST}>
           <ProjectProvider>
               <SprintProvider>
                   <StoryProvider>
