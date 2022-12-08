@@ -1,35 +1,21 @@
-import {Route, Routes, useParams} from "react-router-dom";
-import {useContext, useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import useFetch from "../../../../hooks/useFetch";
 import Loader from "../../../../uikit/Loader";
-import {Form} from "react-bootstrap";
-import {StoryContext} from "./StoryContext";
+import {Form, Tab, Tabs} from "react-bootstrap";
 import {AccessGuard, Permissions, useAccess} from "cerberus-reactjs";
 
-export default function Story() {
-    const params = useParams()
-    const storyCtx = useContext(StoryContext)
-    const {get, loading} = useFetch("/api/")
+export default function Story(props) {
+    const {story, stories, setStories} = props
 
-    useEffect(() => {
-        get("stories/"+params.id)
-            .then(d => storyCtx.setStory(d))
-            .catch(e => console.error(e))
-    }, [])
-
-    if (loading) {
-        return <Loader/>
-    }
-
-    if (!storyCtx.story) {
-        return <>Could not get story</>
+    if (!story) {
+        return <></>
     }
 
     return <>
-        <Routes>
-            <Route exact path="/" element={<Dashboard story={storyCtx.story} setStory={storyCtx.setStory}/>}/>
-            <Route exact path="permissions" element={<StoryPermissions/>}/>
-        </Routes>
+        <Tabs defaultActiveKey="details">
+            <Tab eventKey="details" title="Details"><Dashboard story={story} stories={stories} setStories={setStories}/></Tab>
+            <Tab eventKey="permissions" title="Permissions"><StoryPermissions story={story}/></Tab>
+        </Tabs>
     </>
 }
 
@@ -43,7 +29,7 @@ function Dashboard(props) {
     const [estimateAccess, setEstimateAccess] = useState(false)
     const [statusAccess, setStatusAccess] = useState(false)
     const [assigneeAccess, setAssigneeAccess] = useState(false)
-    const {story, setStory} = props
+    const {story, setStories} = props
 
     useAccess(story.id, "EstimateStory", setEstimateAccess)
     useAccess(story.id, "ChangeStoryStatus", setStatusAccess)
@@ -71,7 +57,7 @@ function Dashboard(props) {
         })
             .then(d => {
                 if (d) {
-                    setStory(d)
+                    setStories(prev => [...prev.filter(s => s.id !== story.id), d].sort((a, b) => a.description > b.description))
                 }
             })
             .catch(e => console.error(e))
@@ -83,7 +69,7 @@ function Dashboard(props) {
         })
             .then(d => {
                 if (d) {
-                    setStory(d)
+                    setStories(prev => [...prev.filter(s => s.id !== story.id), d].sort((a, b) => a.description > b.description))
                 }
             })
             .catch(e => console.error(e))
@@ -95,7 +81,7 @@ function Dashboard(props) {
         })
             .then(d => {
                 if (d) {
-                    setStory(d)
+                    setStories(prev => [...prev.filter(s => s.id !== story.id), d].sort((a, b) => a.description > b.description))
                 }
             })
             .catch(e => console.error(e))
@@ -138,12 +124,12 @@ function Dashboard(props) {
     </>
 }
 
-function StoryPermissions() {
-    const storyCtx = useContext(StoryContext)
+function StoryPermissions(props) {
+    const {story} = props
 
     return <>
-        <AccessGuard resourceId={storyCtx.story.id} action="ReadStoryPermissions">
-            <Permissions resourceId={storyCtx.story.id} changeAction="ChangeStoryPermissions"/>
+        <AccessGuard resourceId={story.id} action="ReadStoryPermissions">
+            <Permissions resourceId={story.id} changeAction="ChangeStoryPermissions"/>
         </AccessGuard>
     </>
 }

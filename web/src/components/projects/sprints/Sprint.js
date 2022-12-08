@@ -6,6 +6,7 @@ import Loader from "../../../uikit/Loader";
 import Btn from "../../../uikit/Btn";
 import Stories from "./stories/Stories";
 import {AccessGuard, Permissions} from "cerberus-reactjs";
+import {Card} from "react-bootstrap";
 
 export default function Sprint() {
     const params = useParams()
@@ -41,23 +42,33 @@ function Dashboard() {
     const sprint = sprintCtx.sprint
 
     return <>
-        <h1>Sprint {sprint.sprintNumber}</h1>
-        <h2>Goal</h2>
-        <p>{sprint.goal}</p>
-        {
-            sprint.startDate === 0 ?
-                <ChangeSprint sprintCtx={sprintCtx} start={true}/> :
-                <>
-                    <p>Started on {new Date(sprint.startDate * 1000).toDateString()}</p>
-                    {
-                        sprint.endDate === 0 ?
-                            <ChangeSprint sprintCtx={sprintCtx} start={false}/> :
-                            <>
-                                <p>Ended on {new Date(sprint.endDate * 1000).toDateString()}</p>
-                            </>
-                    }
-                </>
-        }
+        <Card className="m-2">
+            <Card.Header>Sprint {sprint.sprintNumber}</Card.Header>
+            <Card.Body>
+                <h2>Goal</h2>
+                <p>{sprint.goal}</p>
+                {
+                    sprint.startDate === 0 ?
+                        <ChangeSprint sprintCtx={sprintCtx} start={true}/> :
+                        <>
+                            <p>Started on {new Date(sprint.startDate * 1000).toDateString()}</p>
+                            {
+                                sprint.endDate === 0 ?
+                                    <ChangeSprint sprintCtx={sprintCtx} start={false}/> :
+                                    <>
+                                        <p>Ended on {new Date(sprint.endDate * 1000).toDateString()}</p>
+                                    </>
+                            }
+                        </>
+                }
+            </Card.Body>
+        </Card>
+        <Card className="m-2">
+            <Card.Header>Stories</Card.Header>
+            <Card.Body>
+                <Stories/>
+            </Card.Body>
+        </Card>
 
     </>
 }

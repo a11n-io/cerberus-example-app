@@ -1,9 +1,6 @@
 
 import {useContext, useEffect, useState} from "react";
 import {Link, NavLink, Route, Routes, useParams} from "react-router-dom";
-import useFetch from "../../hooks/useFetch";
-import Loader from "../../uikit/Loader";
-import StoryMenu from "./StoryMenu";
 import {ProjectContext} from "../projects/ProjectContext";
 import {SprintContext} from "../projects/sprints/SprintContext";
 import {AccessGuard} from "cerberus-reactjs";
@@ -18,7 +15,6 @@ export default function SprintMenu() {
 
     return <>
         <Routes>
-            <Route path="stories/:id/*" element={<StoryMenu/>}/>
             <Route exact path="/*" element={<Menu project={projectCtx.project} sprint={sprintCtx.sprint}/>}/>
         </Routes>
     </>
@@ -42,10 +38,6 @@ function Menu(props) {
                         <NavLink end to={`permissions`}>Permissions</NavLink>
                     </li>
                 </AccessGuard>
-
-                <li className="nav-item">
-                    <NavLink end to={`stories`}>Stories</NavLink>
-                </li>
             </ul>
         </div>
     </>

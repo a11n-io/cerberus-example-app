@@ -1,11 +1,12 @@
 import {useContext, useEffect, useState} from "react";
 import useFetch from "../../../../hooks/useFetch";
 import Loader from "../../../../uikit/Loader";
-import {Routes, Route, Link} from "react-router-dom";
+import {Routes, Route} from "react-router-dom";
 import CreateStory from "./CreateStory";
 import Story from "./Story";
 import {SprintContext} from "../SprintContext";
-import {AccessGuard} from "cerberus-reactjs";
+import {AccessGuard, useAccess} from "cerberus-reactjs";
+import {Col, Container, ListGroup, ListGroupItem, Row} from "react-bootstrap";
 
 export default function Stories() {
 
@@ -19,9 +20,9 @@ export default function Stories() {
 
 function StoryList() {
     const [stories, setStories] = useState([])
+    const [selectedStory, setSelectedStory] = useState(null)
     const sprintCtx = useContext(SprintContext)
     const {get, loading} = useFetch("/api/")
-    const [showCreate, setShowCreate] = useState(false)
 
     useEffect(() => {
         get("sprints/"+sprintCtx.sprint.id+"/stories")
@@ -33,9 +34,17 @@ function StoryList() {
             .catch(e => console.error(e))
     }, [])
 
-    function handleNewClicked(e) {
-        e.preventDefault()
-        setShowCreate(p => !p)
+    function handleStorySelected(e) {
+        const storyId = e.target.getAttribute('data-val1')
+
+        if (selectedStory !== null && selectedStory !== undefined) {
+            if (selectedStory.id === storyId) {
+                setSelectedStory(null)
+                return
+            }
+        }
+
+        setSelectedStory(stories.find((s) => s.id === storyId))
     }
 
     if (loading) {
@@ -44,36 +53,49 @@ function StoryList() {
 
     return <>
 
-        <ul>
-            {
-                stories.map(story => {
-                    return (
-                        <li className="nav-item" key={story.id}>
-                            <AccessGuard
-                                resourceId={story.id}
-                                action="ReadStory"
-                                otherwise={<span>{story.description}</span>}>
-                                <Link to={`${story.id}`}>
-                                    <i>{story.description}</i>
-                                    <i className="m-1">&#8594;</i>
-                                </Link>
-                            </AccessGuard>
-                        </li>
-                    )
-                })
-            }
-        </ul>
+        <Container>
+            <Row>
+                <Col sm={4}>
+                    <ListGroup>
+                        {
+                            stories.map(story => {
+                                return (
+                                    <StoryButton key={story.id} story={story} selectedStory={selectedStory} handleStorySelected={handleStorySelected}/>
+                                )
+                            })
+                        }
+                    </ListGroup>
+                </Col>
+                <Col sm={8}>
+                    {
+                        selectedStory
+                            ? <Story story={selectedStory} stories={stories} setStories={setStories}/>
+                            : <AccessGuard resourceId={sprintCtx.sprint.id} action="CreateStory">
+                                    <CreateStory stories={stories} setStories={setStories}/>
+                              </AccessGuard>
+                    }
+                </Col>
+            </Row>
+        </Container>
+    </>
+}
 
-        <AccessGuard resourceId={sprintCtx.sprint.id} action="CreateStory">
-            {
-                !showCreate && <Link to="" onClick={handleNewClicked}>New Story</Link>
-            }
-            {
-                showCreate && <CreateStory
-                    stories={stories}
-                    setStories={setStories}
-                    setShowCreate={setShowCreate}/>
-            }
-        </AccessGuard>
+function StoryButton(props) {
+    const [readAccess, setReadAccess] = useState(false)
+    useAccess(props.story.id, "ReadStory", setReadAccess)
+
+    return <>
+        <ListGroupItem
+            disabled={!readAccess}
+            action
+            active={props.selectedStory && props.selectedStory.id === props.story.id}
+            onClick={props.handleStorySelected}
+            data-val1={props.story.id}
+            className='d-flex justify-content-between align-items-start'
+        >
+            <div className='ms-2 me-auto'>
+                <div className='fw-bold' data-val1={props.story.id}>{props.story.description}</div>
+            </div>
+        </ListGroupItem>
     </>
 }

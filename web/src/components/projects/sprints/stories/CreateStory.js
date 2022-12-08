@@ -18,7 +18,6 @@ export default function CreateStory(props) {
             .then(r => {
                 if (r) {
                     props.setStories([...props.stories, r])
-                    props.setShowCreate(false)
                 }
             })
             .catch(e => console.error(e))
