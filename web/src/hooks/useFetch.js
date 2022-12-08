@@ -1,20 +1,28 @@
 import {useContext, useState} from "react";
 import {AuthContext} from "../context/AuthContext";
+import {CerberusContext} from "cerberus-reactjs";
 
 export default function useFetch(baseUrl) {
     const [loading, setLoading] = useState(false);
     const authCtx = useContext(AuthContext)
+    const cerberusCtx = useContext(CerberusContext)
 
     const defaultHeaders = {
         "Content-Type": "application/json",
     }
 
-    function get(url, headers) {
-        let hdrs = defaultHeaders
-        if (authCtx.user) {
-            hdrs = {...hdrs, "Authorization": "Bearer " + authCtx.user.token}
+    let hdrs = defaultHeaders
+    if (authCtx.user) {
+        hdrs = {
+            ...hdrs,
+            "Authorization": "Bearer " + authCtx.user.token,
+            "CerberusAccessToken": cerberusCtx.apiTokenPair.accessToken,
+            "CerberusRefreshToken": cerberusCtx.apiTokenPair.refreshToken
         }
-        hdrs = {...hdrs, ...headers}
+    }
+
+    function get(url, headers) {
+        hdrs = { ...hdrs, ...headers }
 
         return new Promise((resolve, reject) => {
             setLoading(true);
@@ -39,11 +47,7 @@ export default function useFetch(baseUrl) {
     }
 
     function post(url, body, headers) {
-        let hdrs = defaultHeaders
-        if (authCtx.user) {
-            hdrs = {...hdrs, "Authorization": "Bearer " + authCtx.user.token}
-        }
-        hdrs = {...hdrs, ...headers}
+        hdrs = { ...hdrs, ...headers }
 
         return new Promise((resolve, reject) => {
             setLoading(true);
@@ -68,11 +72,7 @@ export default function useFetch(baseUrl) {
     }
 
     function put(url, body, headers) {
-        let hdrs = defaultHeaders
-        if (authCtx.user) {
-            hdrs = {...hdrs, "Authorization": "Bearer " + authCtx.user.token}
-        }
-        hdrs = {...hdrs, ...headers}
+        hdrs = { ...hdrs, ...headers }
 
         return new Promise((resolve, reject) => {
             setLoading(true);
@@ -97,11 +97,7 @@ export default function useFetch(baseUrl) {
     }
 
     function del(url, headers) {
-        let hdrs = defaultHeaders
-        if (authCtx.user) {
-            hdrs = {...hdrs, "Authorization": "Bearer " + authCtx.user.token}
-        }
-        hdrs = {...hdrs, ...headers}
+        hdrs = { ...hdrs, ...headers }
 
         return new Promise((resolve, reject) => {
             setLoading(true);

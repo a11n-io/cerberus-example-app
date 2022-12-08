@@ -26,8 +26,7 @@ export default function Login() {
             password: password
         }, {"Authorization": basicAuth})
             .then(r => {
-                auth.setUser(r)
-                cerberusCtx.setApiToken(r.cerberusToken)
+                auth.login(r)
                 navigate("/")
             })
             .catch(e => console.error(e))

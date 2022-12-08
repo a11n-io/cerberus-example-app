@@ -5,6 +5,7 @@ import (
 	"cerberus-example-app/internal/services/jwtutils"
 	"context"
 	"fmt"
+	cerberus "github.com/a11n-io/go-cerberus"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
@@ -84,34 +85,39 @@ func (s *webServer) JWTAuthRequired(c *gin.Context) {
 		return
 	}
 
-	userId, accountId, cerberusToken, err := s.extractSubjectAndToken(token)
-	if err != nil || userId == "" || accountId == "" || cerberusToken == "" {
+	userId, accountId, err := s.extractSubjectAndToken(token)
+	if err != nil || userId == "" || accountId == "" {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
+	}
+
+	cerberusTokenPair := cerberus.TokenPair{
+		AccessToken:  c.GetHeader("CerberusAccessToken"),
+		RefreshToken: c.GetHeader("CerberusRefreshToken"),
 	}
 
 	// Set userId and cerberusToken for route handlers
 	c.Set("userId", userId)
 	c.Set("accountId", accountId)
-	c.Set("cerberusToken", cerberusToken)
+	c.Set("cerberusTokenPair", cerberusTokenPair)
 
 	c.Next()
 }
 
-func (s *webServer) extractSubjectAndToken(bearer string) (string, string, string, error) {
+func (s *webServer) extractSubjectAndToken(bearer string) (string, string, error) {
 	if bearer == "" {
-		return "", "", "", nil
+		return "", "", nil
 	}
 	subject, err := jwtutils.ExtractToken(bearer, s.jwtSecret, func(token *jwt.Token) interface{} {
 		claims := token.Claims.(jwt.MapClaims)
 		return claims["sub"]
 	})
 	if err != nil {
-		return "", "", "", err
+		return "", "", err
 	}
 
 	if subject == nil {
-		return "", "", "", fmt.Errorf("empty subject in claims")
+		return "", "", fmt.Errorf("empty subject in claims")
 	}
 
 	accountId, err := jwtutils.ExtractToken(bearer, s.jwtSecret, func(token *jwt.Token) interface{} {
@@ -123,30 +129,14 @@ func (s *webServer) extractSubjectAndToken(bearer string) (string, string, strin
 		return extraClaims["accountId"]
 	})
 	if err != nil {
-		return "", "", "", err
+		return "", "", err
 	}
 
 	if accountId == nil {
-		return "", "", "", fmt.Errorf("empty accountId in extra claims")
+		return "", "", fmt.Errorf("empty accountId in extra claims")
 	}
 
-	cerberusToken, err := jwtutils.ExtractToken(bearer, s.jwtSecret, func(token *jwt.Token) interface{} {
-		claims := token.Claims.(jwt.MapClaims)
-		extraClaims, ok := claims[subject.(string)].(map[string]interface{})
-		if !ok {
-			return nil
-		}
-		return extraClaims["cerberusToken"]
-	})
-	if err != nil {
-		return "", "", "", err
-	}
-
-	if cerberusToken == nil {
-		return "", "", "", fmt.Errorf("empty cerberusToken in extra claims")
-	}
-
-	return subject.(string), accountId.(string), cerberusToken.(string), nil
+	return subject.(string), accountId.(string), nil
 }
 
 func applyCors(r *gin.Engine) {
@@ -154,5 +144,6 @@ func applyCors(r *gin.Engine) {
 	//hot reload CORS
 	corsConfig.AllowOrigins = []string{"http://localhost:3001"}
 	corsConfig.AllowCredentials = true
+	corsConfig.AllowHeaders = []string{"Content-Type", "Authorization", "CerberusAccessToken", "CerberusRefreshToken"}
 	r.Use(cors.New(corsConfig))
 }

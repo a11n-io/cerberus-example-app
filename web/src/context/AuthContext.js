@@ -1,14 +1,28 @@
 import {createContext, useContext, useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
+import {CerberusContext} from "cerberus-reactjs";
 
 const AuthContext = createContext(null)
 
 function AuthProvider(props) {
+    const cerberusCtx = useContext(CerberusContext)
+
     const [user, setUser] = useState()
+
+    const logout = () => {
+        setUser(null)
+        cerberusCtx.setApiTokenPair(null)
+    }
+
+    const login = (user) => {
+        setUser(user)
+        cerberusCtx.setApiTokenPair(user.cerberusTokenPair)
+    }
 
     const value = {
         user: user,
-        setUser: setUser,
+        login: login,
+        logout: logout,
     }
 
     return (

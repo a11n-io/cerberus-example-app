@@ -7,7 +7,7 @@ export default function Navbar() {
     const navigate = useNavigate()
 
     function handleLogout() {
-        auth.setUser(null)
+        auth.logout()
         navigate("/login")
     }
 

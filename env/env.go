@@ -20,7 +20,6 @@ type EnvApp struct {
 
 	// Database Envs
 	CERBERUS_HOST       string
-	CERBERUS_PORT       string
 	CERBERUS_API_KEY    string
 	CERBERUS_API_SECRET string
 }
@@ -44,7 +43,6 @@ func GetEnv(env_file string) EnvApp {
 		JWT_SECRET:          os.Getenv("JWT_SECRET"),
 		SALT_ROUNDS:         int(saltRounds),
 		CERBERUS_HOST:       os.Getenv("CERBERUS_HOST"),
-		CERBERUS_PORT:       os.Getenv("CERBERUS_PORT"),
 		CERBERUS_API_KEY:    os.Getenv("CERBERUS_API_KEY"),
 		CERBERUS_API_SECRET: os.Getenv("CERBERUS_API_SECRET"),
 	}

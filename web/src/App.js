@@ -11,13 +11,11 @@ import SettingsMenu from "./components/menu/SettingsMenu";
 import Settings from "./components/settings/Settings";
 import {SprintProvider} from "./components/projects/sprints/SprintContext";
 import {StoryProvider} from "./components/projects/sprints/stories/StoryContext";
-import {CerberusProvider} from "cerberus-reactjs";
 
 function App() {
 
   return (
       <BrowserRouter>
-          <CerberusProvider apiHost={process.env.REACT_APP_CERBERUS_API_HOST} socketHost={process.env.REACT_APP_CERBERUS_WS_HOST}>
           <ProjectProvider>
               <SprintProvider>
                   <StoryProvider>
@@ -52,7 +50,6 @@ function App() {
                   </StoryProvider>
               </SprintProvider>
           </ProjectProvider>
-          </CerberusProvider>
       </BrowserRouter>
   );
 }

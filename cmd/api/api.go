@@ -9,7 +9,6 @@ import (
 	"cerberus-example-app/internal/services"
 	"cerberus-example-app/internal/utils"
 	"context"
-	"fmt"
 	cerberus "github.com/a11n-io/go-cerberus"
 	"github.com/golang-migrate/migrate/v4"
 	cerberusmigrate "github.com/golang-migrate/migrate/v4/database/cerberus"
@@ -25,7 +24,7 @@ func main() {
 	// env config
 	_env := env.GetEnv(".env.dev")
 
-	cerberusClient := cerberus.NewClient(fmt.Sprintf("http://%s:%s", _env.CERBERUS_HOST, _env.CERBERUS_PORT), _env.CERBERUS_API_KEY, _env.CERBERUS_API_SECRET)
+	cerberusClient := cerberus.NewClient(_env.CERBERUS_HOST, _env.CERBERUS_API_KEY, _env.CERBERUS_API_SECRET)
 
 	db, err := database.NewDB()
 	utils.PanicOnError(err)

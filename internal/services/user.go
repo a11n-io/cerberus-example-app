@@ -76,7 +76,7 @@ func (s *userService) Register(ctx context.Context, email, plainPassword, name s
 
 	// CERBERUS create account resource, user and role
 	log.Println("Creating Cerberus artifacts")
-	cerberusToken, err := s.cerberusClient.GetUserToken(ctx, account.Id, user.Id)
+	cerberusTokenPair, err := s.cerberusClient.GetUserToken(ctx, account.Id, user.Id)
 	if err != nil {
 		if rbe := tx.Rollback(); rbe != nil {
 			err = fmt.Errorf("rollback error (%v) after %w", rbe, err)
@@ -84,7 +84,7 @@ func (s *userService) Register(ctx context.Context, email, plainPassword, name s
 		return repositories.User{}, err
 	}
 
-	cerberusContext := context.WithValue(ctx, "cerberusToken", cerberusToken)
+	cerberusContext := context.WithValue(ctx, "cerberusTokenPair", cerberusTokenPair)
 
 	roleId := uuid.New().String()
 
@@ -103,7 +103,7 @@ func (s *userService) Register(ctx context.Context, email, plainPassword, name s
 	}
 
 	subject := user.Id
-	token, err := jwtutils.Sign(subject, toClaims(user, cerberusToken), s.jwtSecret)
+	token, err := jwtutils.Sign(subject, toClaims(user), s.jwtSecret)
 	if err != nil {
 		if rbe := tx.Rollback(); rbe != nil {
 			err = fmt.Errorf("rollback error (%v) after %w", rbe, err)
@@ -111,7 +111,7 @@ func (s *userService) Register(ctx context.Context, email, plainPassword, name s
 		return repositories.User{}, err
 	}
 
-	return userWithTokens(user, token, cerberusToken), tx.Commit()
+	return userWithTokens(user, token, cerberusTokenPair), tx.Commit()
 }
 
 // Login finds a user and returns that user with a jwt token
@@ -129,7 +129,7 @@ func (s *userService) Login(ctx context.Context, email string, password string) 
 	}
 
 	subject := user.Id
-	token, err := jwtutils.Sign(subject, toClaims(user, cerberusToken), s.jwtSecret)
+	token, err := jwtutils.Sign(subject, toClaims(user), s.jwtSecret)
 	if err != nil {
 		return repositories.User{}, err
 	}
@@ -180,23 +180,22 @@ func (s *userService) GetAll(ctx context.Context) (_ []cerberus.User, err error)
 	return s.cerberusClient.GetUsers(ctx)
 }
 
-func toClaims(user repositories.User, cerberusToken string) map[string]interface{} {
+func toClaims(user repositories.User) map[string]interface{} {
 	return map[string]interface{}{
-		"sub":           user.Id,
-		"email":         user.Email,
-		"name":          user.Name,
-		"accountId":     user.AccountId,
-		"cerberusToken": cerberusToken,
+		"sub":       user.Id,
+		"email":     user.Email,
+		"name":      user.Name,
+		"accountId": user.AccountId,
 	}
 }
 
-func userWithTokens(user repositories.User, token, cerberusToken string) repositories.User {
+func userWithTokens(user repositories.User, token string, cerberusTokenPair cerberus.TokenPair) repositories.User {
 	return repositories.User{
-		Token:         token,
-		CerberusToken: cerberusToken,
-		Id:            user.Id,
-		AccountId:     user.AccountId,
-		Email:         user.Email,
-		Name:          user.Name,
+		Token:             token,
+		CerberusTokenPair: cerberusTokenPair,
+		Id:                user.Id,
+		AccountId:         user.AccountId,
+		Email:             user.Email,
+		Name:              user.Name,
 	}
 }
