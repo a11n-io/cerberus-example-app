@@ -10,6 +10,7 @@ import ProjectMenu from "./components/menu/ProjectMenu";
 import SettingsMenu from "./components/menu/SettingsMenu";
 import Settings from "./components/settings/Settings";
 import {SprintProvider} from "./components/projects/sprints/SprintContext";
+import Sprints from "./components/projects/sprints/Sprints";
 
 function App() {
 
@@ -23,17 +24,12 @@ function App() {
                               <Navbar/>
                           </header>
                       </div>
-                      <div className="grid-menu">
-                          <Routes>
-                              <Route path="/projects/:id/*" element={<AuthGuard><ProjectMenu/></AuthGuard>}/>
-                              <Route path="/settings/*" element={<AuthGuard><SettingsMenu/></AuthGuard>}/>
-                          </Routes>
-                      </div>
                       <div className="grid-main">
                           <main className="container">
                                   <Routes>
                                       <Route path="/settings/*" element={<AuthGuard redirectTo="/login"><Settings/></AuthGuard>}/>
                                       <Route path="/projects/*" element={<AuthGuard redirectTo="/login"><Projects/></AuthGuard>}/>
+                                      <Route path="/sprints/*" element={<AuthGuard redirectTo="/login"><Sprints/></AuthGuard>}/>
                                       <Route exact path="/" element={<AuthGuard redirectTo="/login"><Home/></AuthGuard>}/>
                                       <Route exact path="/login" element={<Login/>}/>
                                       <Route exact path="/register" element={<Register/>}/>

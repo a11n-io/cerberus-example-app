@@ -5,48 +5,37 @@ import Loader from "../../uikit/Loader";
 import Sprints from "./sprints/Sprints";
 import {ProjectContext} from "./ProjectContext";
 import {AccessGuard, Permissions} from "cerberus-reactjs";
-import {Button} from "react-bootstrap";
+import {Button, Tab, Tabs} from "react-bootstrap";
 
-export default function Project() {
-    const params = useParams()
-    const projectCtx = useContext(ProjectContext)
-    const {get, loading} = useFetch("/api/")
+export default function Project(props) {
+    const {project, setSelectedProject, setProjects} = props
 
-    useEffect(() => {
-        get("projects/"+params.id)
-            .then(d => {
-                projectCtx.setProject(d);
-            })
-            .catch(e => console.error(e))
-    }, [])
-
-    if (loading) {
-        return <Loader/>
-    }
-
-    if (!projectCtx.project) {
-        return <>Could not get project</>
+    if (!project) {
+        return <></>
     }
 
     return <>
-        <Routes>
-            <Route path="sprints/*" element={<Sprints/>}/>
-            <Route exact path="/" element={<ProjectDashboard/>}/>
-            <Route exact path="permissions" element={<ProjectPermissions/>}/>
-        </Routes>
+        <Tabs defaultActiveKey="sprints">
+            <Tab eventKey="sprints" title="Sprints" className="m-2"><Sprints project={project}/></Tab>
+            <Tab eventKey="details" title="Details" className="m-2"><ProjectDashboard project={project} setSelectedProject={setSelectedProject} setProjects={setProjects}/></Tab>
+            <Tab eventKey="permissions" title="Permissions" className="m-2"><ProjectPermissions project={project}/></Tab>
+        </Tabs>
     </>
+
 }
 
 
-function ProjectDashboard() {
+function ProjectDashboard(props) {
     const projectCtx = useContext(ProjectContext)
     const {del, loading} = useFetch("/api/")
-    const navigate = useNavigate()
+
+    const {project, setSelectedProject, setProjects} = props
 
     function handleDeleteClicked() {
-        del(`projects/${projectCtx.project.id}`)
+        del(`projects/${project.id}`)
             .then(() => {
-                navigate("/projects")
+                setProjects(prev => prev.filter(p => p.id !== project.id))
+                setSelectedProject(null)
             })
             .catch(e => console.error(e))
     }
@@ -57,22 +46,22 @@ function ProjectDashboard() {
 
     return <>
         <h1>Project Name</h1>
-        <p>{projectCtx.project.name}</p>
+        <p>{project.name}</p>
         <h1>Description</h1>
-        <p>{projectCtx.project.description}</p>
+        <p>{project.description}</p>
 
-        <AccessGuard resourceId={projectCtx.project.id} action="DeleteProject">
-            <Button variant="danger" onClick={handleDeleteClicked}>Delete</Button>
+        <AccessGuard resourceId={project.id} action="DeleteProject">
+            <Button variant="danger" onClick={handleDeleteClicked}>Delete Project</Button>
         </AccessGuard>
     </>
 }
 
-function ProjectPermissions() {
-    const projectCtx = useContext(ProjectContext)
+function ProjectPermissions(props) {
+    const {project} = props
 
     return <>
-        <AccessGuard resourceId={projectCtx.project.id} action="ReadProjectPermissions">
-            <Permissions resourceId={projectCtx.project.id} changeAction="ChangeProjectPermissions"/>
+        <AccessGuard resourceId={project.id} action="ReadProjectPermissions">
+            <Permissions resourceId={project.id} changeAction="ChangeProjectPermissions"/>
         </AccessGuard>
     </>
 }

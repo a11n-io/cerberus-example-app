@@ -9,10 +9,8 @@ import {AccessGuard, useAccess} from "cerberus-reactjs";
 import {Col, Container, ListGroup, ListGroupItem, Row} from "react-bootstrap";
 
 export default function Stories() {
-
     return <>
         <Routes>
-            <Route path=":id/*" element={<Story/>}/>
             <Route exact path="/" element={<StoryList/>}/>
         </Routes>
     </>
@@ -69,9 +67,9 @@ function StoryList() {
                 <Col sm={8}>
                     {
                         selectedStory
-                            ? <Story story={selectedStory} stories={stories} setStories={setStories}/>
+                            ? <Story story={selectedStory} setSelectedStory={setSelectedStory} setStories={setStories}/>
                             : <AccessGuard resourceId={sprintCtx.sprint.id} action="CreateStory">
-                                    <CreateStory stories={stories} setStories={setStories}/>
+                                    <CreateStory setStories={setStories}/>
                               </AccessGuard>
                     }
                 </Col>

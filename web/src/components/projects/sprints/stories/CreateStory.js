@@ -17,7 +17,7 @@ export default function CreateStory(props) {
         })
             .then(r => {
                 if (r) {
-                    props.setStories([...props.stories, r])
+                    props.setStories(prev => [...prev, r].sort((a,b) => a.description > b.description))
                 }
             })
             .catch(e => console.error(e))
@@ -34,7 +34,7 @@ export default function CreateStory(props) {
     return <>
         <form onSubmit={handleFormSubmit}>
             <Input required placeholder="Description" onChange={handleDescriptionChanged}/>
-            <Btn type="submit">Create</Btn>
+            <Btn type="submit">Create Story</Btn>
         </form>
     </>
 }

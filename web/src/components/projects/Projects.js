@@ -5,14 +5,15 @@ import Loader from "../../uikit/Loader";
 import {Routes, Route, Link} from "react-router-dom";
 import Project from "./Project";
 import CreateProject from "./CreateProject";
-import {AccessGuard} from "cerberus-reactjs"
+import {AccessGuard, useAccess} from "cerberus-reactjs"
+import {Col, Container, ListGroup, ListGroupItem, Row} from "react-bootstrap";
+import {ProjectContext} from "./ProjectContext";
 
 export default function Projects() {
 
     return <>
 
         <Routes>
-            <Route path=":id/*" element={<Project/>}/>
             <Route exact path="/" element={<ProjectList/>}/>
         </Routes>
 
@@ -22,19 +23,34 @@ export default function Projects() {
 
 function ProjectList() {
     const [projects, setProjects] = useState([])
+    const [selectedProject, setSelectedProject] = useState(null)
     const authCtx = useContext(AuthContext)
+    const projectCtx = useContext(ProjectContext)
     const {get, loading} = useFetch("/api/")
-    const [showCreate, setShowCreate] = useState(false)
 
     useEffect(() => {
+        if (projectCtx.project) {
+            setSelectedProject(projectCtx.project)
+        }
+
         get("accounts/"+authCtx.user.accountId+"/projects")
             .then(d => setProjects(d))
             .catch(e => console.error(e))
     }, [])
 
-    function handleNewClicked(e) {
-        e.preventDefault()
-        setShowCreate(p => !p)
+    function handleProjectSelected(e) {
+        const projectId = e.target.getAttribute('data-val1')
+
+        if (selectedProject !== null && selectedProject !== undefined) {
+            if (selectedProject.id === projectId) {
+                setSelectedProject(null)
+                return
+            }
+        }
+
+        const project = projects.find((p) => p.id === projectId)
+        setSelectedProject(project)
+        projectCtx.setProject(project)
     }
 
     if (loading) {
@@ -42,32 +58,49 @@ function ProjectList() {
     }
 
     return <>
-
-        <ul>
-            {
-                projects.map(project => {
-                    return (
-                        <li className="nav-item" key={project.id}>
-                            <AccessGuard
-                                resourceId={project.id}
-                                action="ReadProject"
-                                otherwise={<span>{project.name}</span>}>
-                                <Link to={`/projects/${project.id}`}>
-                                    <i>{project.name}</i>
-                                    <i className="m-1">&#8594;</i>
-                                </Link>
+        <Container>
+            <Row>
+                <Col sm={4}>
+                    <ListGroup>
+                        {
+                            projects.map(project => {
+                                return (
+                                    <ProjectButton key={project.id} project={project} selectedProject={selectedProject} handleProjectSelected={handleProjectSelected}/>
+                                )
+                            })
+                        }
+                    </ListGroup>
+                </Col>
+                <Col sm={8}>
+                    {
+                        selectedProject
+                            ? <Project project={selectedProject} setSelectedProject={setSelectedProject} setProjects={setProjects}/>
+                            : <AccessGuard resourceId={authCtx.user.accountId} action="CreateProject">
+                                <CreateProject setProjects={setProjects}/>
                             </AccessGuard>
-                        </li>
-                    )
-                })
-            }
-        </ul>
+                    }
+                </Col>
+            </Row>
+        </Container>
+    </>
+}
 
-        <AccessGuard resourceId={authCtx.user.accountId} action="CreateProject">
-            <Link to="" onClick={handleNewClicked}>New Project</Link>
-            {
-                showCreate && <CreateProject/>
-            }
-        </AccessGuard>
+function ProjectButton(props) {
+    const [readAccess, setReadAccess] = useState(false)
+    useAccess(props.project.id, "ReadProject", setReadAccess)
+
+    return <>
+        <ListGroupItem
+            disabled={!readAccess}
+            action
+            active={props.selectedProject && props.selectedProject.id === props.project.id}
+            onClick={props.handleProjectSelected}
+            data-val1={props.project.id}
+            className='d-flex justify-content-between align-items-start'
+        >
+            <div className='ms-2 me-auto'>
+                <div className='fw-bold' data-val1={props.project.id}>{props.project.name}</div>
+            </div>
+        </ListGroupItem>
     </>
 }

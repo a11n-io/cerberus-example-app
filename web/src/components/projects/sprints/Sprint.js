@@ -6,7 +6,7 @@ import Loader from "../../../uikit/Loader";
 import Btn from "../../../uikit/Btn";
 import Stories from "./stories/Stories";
 import {AccessGuard, Permissions} from "cerberus-reactjs";
-import {Card} from "react-bootstrap";
+import {Card, Tab, Tabs} from "react-bootstrap";
 
 export default function Sprint() {
     const params = useParams()
@@ -29,9 +29,7 @@ export default function Sprint() {
 
     return <>
         <Routes>
-            <Route path="stories/*" element={<Stories/>}/>
             <Route exact path="/" element={<Dashboard/>}/>
-            <Route exact path="permissions" element={<SprintPermissions/>}/>
         </Routes>
     </>
 }
@@ -43,33 +41,40 @@ function Dashboard() {
 
     return <>
         <Card className="m-2">
-            <Card.Header>Sprint {sprint.sprintNumber}</Card.Header>
+            <Card.Header>Sprint {sprint.sprintNumber}: {sprint.goal}</Card.Header>
             <Card.Body>
-                <h2>Goal</h2>
-                <p>{sprint.goal}</p>
-                {
-                    sprint.startDate === 0 ?
-                        <ChangeSprint sprintCtx={sprintCtx} start={true}/> :
-                        <>
-                            <p>Started on {new Date(sprint.startDate * 1000).toDateString()}</p>
-                            {
-                                sprint.endDate === 0 ?
-                                    <ChangeSprint sprintCtx={sprintCtx} start={false}/> :
-                                    <>
-                                        <p>Ended on {new Date(sprint.endDate * 1000).toDateString()}</p>
-                                    </>
-                            }
-                        </>
-                }
-            </Card.Body>
-        </Card>
-        <Card className="m-2">
-            <Card.Header>Stories</Card.Header>
-            <Card.Body>
-                <Stories/>
+                <Tabs defaultActiveKey="stories">
+                    <Tab eventKey="stories" title="Stories" className="m-2"><Stories /></Tab>
+                    <Tab eventKey="details" title="Details" className="m-2"><Details /></Tab>
+                    <Tab eventKey="permissions" title="Permissions" className="m-2"><SprintPermissions /></Tab>
+                </Tabs>
             </Card.Body>
         </Card>
 
+    </>
+}
+
+function Details() {
+    const sprintCtx = useContext(SprintContext)
+    const sprint = sprintCtx.sprint
+
+    return <>
+        <h2>Goal</h2>
+        <p>{sprint.goal}</p>
+        {
+            sprint.startDate === 0 ?
+                <ChangeSprint sprintCtx={sprintCtx} start={true}/> :
+                <>
+                    <p>Started on {new Date(sprint.startDate * 1000).toDateString()}</p>
+                    {
+                        sprint.endDate === 0 ?
+                            <ChangeSprint sprintCtx={sprintCtx} start={false}/> :
+                            <>
+                                <p>Ended on {new Date(sprint.endDate * 1000).toDateString()}</p>
+                            </>
+                    }
+                </>
+        }
     </>
 }
 

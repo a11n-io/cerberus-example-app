@@ -2,36 +2,43 @@ import {useContext, useEffect, useState} from "react";
 import useFetch from "../../../hooks/useFetch";
 import Loader from "../../../uikit/Loader";
 import {Routes, Route, Link} from "react-router-dom";
-import {ProjectContext} from "../ProjectContext";
 import Sprint from "./Sprint";
 import CreateSprint from "./CreateSprint";
 import {AccessGuard} from "cerberus-reactjs";
+import {ProjectContext} from "../ProjectContext";
 
-export default function Sprints() {
+export default function Sprints(props) {
+    const projectCtx = useContext(ProjectContext)
+    const {project} = props
 
     return <>
+        <h1>Project: {projectCtx.project.name}</h1>
         <Routes>
             <Route path=":id/*" element={<Sprint/>}/>
-            <Route exact path="/" element={<SprintList/>}/>
+            <Route exact path="/" element={<SprintList project={project}/>}/>
         </Routes>
     </>
 }
 
-function SprintList() {
+function SprintList(props) {
     const [sprints, setSprints] = useState([])
-    const projectCtx = useContext(ProjectContext)
     const {get, loading} = useFetch("/api/")
     const [showCreate, setShowCreate] = useState(false)
 
+    const {project} = props
+
     useEffect(() => {
-        get("projects/"+projectCtx.project.id+"/sprints")
+        get("projects/"+project.id+"/sprints")
             .then(d => {
                 if (d) {
                     setSprints(d)
                 }
             })
-            .catch(e => console.error(e))
-    }, [])
+            .catch(e => {
+                console.error(e)
+                setSprints([])
+            })
+    }, [project])
 
     function handleNewClicked(e) {
         e.preventDefault()
@@ -53,7 +60,7 @@ function SprintList() {
                                 resourceId={sprint.id}
                                 action="ReadSprint"
                                 otherwise={<span>{sprint.sprintNumber}: {sprint.goal}</span>}>
-                                <Link to={`${sprint.id}`}>
+                                <Link to={`/sprints/${sprint.id}`}>
                                     <i>{sprint.sprintNumber}: {sprint.goal}</i>
                                     <i className="m-1">&#8594;</i>
                                 </Link>
@@ -64,7 +71,7 @@ function SprintList() {
             }
         </ul>
 
-        <AccessGuard resourceId={projectCtx.project.id} action="CreateSprint">
+        <AccessGuard resourceId={project.id} action="CreateSprint">
             {
                 !showCreate && <Link to="" onClick={handleNewClicked}>New Sprint</Link>
             }

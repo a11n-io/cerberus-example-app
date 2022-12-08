@@ -35,7 +35,7 @@ export default function CreateSprint(props) {
     return <>
         <form onSubmit={handleFormSubmit}>
             <Input required placeholder="Goal" onChange={handleGoalChanged}/>
-            <Btn type="submit">Create</Btn>
+            <Btn type="submit">Create Sprint</Btn>
         </form>
     </>
 }

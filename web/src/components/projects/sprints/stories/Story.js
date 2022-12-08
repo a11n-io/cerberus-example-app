@@ -5,7 +5,7 @@ import {Form, Tab, Tabs} from "react-bootstrap";
 import {AccessGuard, Permissions, useAccess} from "cerberus-reactjs";
 
 export default function Story(props) {
-    const {story, stories, setStories} = props
+    const {story, setSelectedStory, setStories} = props
 
     if (!story) {
         return <></>
@@ -13,7 +13,7 @@ export default function Story(props) {
 
     return <>
         <Tabs defaultActiveKey="details">
-            <Tab eventKey="details" title="Details"><Dashboard story={story} stories={stories} setStories={setStories}/></Tab>
+            <Tab eventKey="details" title="Details"><Dashboard story={story} setSelectedStory={setSelectedStory} setStories={setStories}/></Tab>
             <Tab eventKey="permissions" title="Permissions"><StoryPermissions story={story}/></Tab>
         </Tabs>
     </>
@@ -29,7 +29,7 @@ function Dashboard(props) {
     const [estimateAccess, setEstimateAccess] = useState(false)
     const [statusAccess, setStatusAccess] = useState(false)
     const [assigneeAccess, setAssigneeAccess] = useState(false)
-    const {story, setStories} = props
+    const {story, setSelectedStory, setStories} = props
 
     useAccess(story.id, "EstimateStory", setEstimateAccess)
     useAccess(story.id, "ChangeStoryStatus", setStatusAccess)
@@ -57,7 +57,8 @@ function Dashboard(props) {
         })
             .then(d => {
                 if (d) {
-                    setStories(prev => [...prev.filter(s => s.id !== story.id), d].sort((a, b) => a.description > b.description))
+                    setSelectedStory({...d})
+                    setStories(prev => [...prev.filter(s => s.id !== story.id), d].sort((a,b) => a.description > b.description))
                 }
             })
             .catch(e => console.error(e))
@@ -69,7 +70,8 @@ function Dashboard(props) {
         })
             .then(d => {
                 if (d) {
-                    setStories(prev => [...prev.filter(s => s.id !== story.id), d].sort((a, b) => a.description > b.description))
+                    setSelectedStory({...d})
+                    setStories(prev => [...prev.filter(s => s.id !== story.id), d].sort((a,b) => a.description > b.description))
                 }
             })
             .catch(e => console.error(e))
@@ -81,7 +83,8 @@ function Dashboard(props) {
         })
             .then(d => {
                 if (d) {
-                    setStories(prev => [...prev.filter(s => s.id !== story.id), d].sort((a, b) => a.description > b.description))
+                    setSelectedStory({...d})
+                    setStories(prev => [...prev.filter(s => s.id !== story.id), d].sort((a,b) => a.description > b.description))
                 }
             })
             .catch(e => console.error(e))
@@ -92,7 +95,6 @@ function Dashboard(props) {
     }
 
     return <>
-        <h1>Story</h1>
         <h2>Description</h2>
         <p>{story.description}</p>
         <Form className="mb-5">
