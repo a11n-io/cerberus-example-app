@@ -5,7 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import {AuthProvider} from "./context/AuthContext";
-import {CerberusProvider} from "cerberus-reactjs";
+import {CerberusProvider} from "@a11n-io/cerberus-reactjs";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

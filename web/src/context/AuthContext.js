@@ -1,13 +1,14 @@
 import {createContext, useContext, useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
-import {CerberusContext} from "cerberus-reactjs";
+import {CerberusContext} from "@a11n-io/cerberus-reactjs";
+import useSessionStorageState from 'use-session-storage-state';
 
 const AuthContext = createContext(null)
 
 function AuthProvider(props) {
     const cerberusCtx = useContext(CerberusContext)
 
-    const [user, setUser] = useState()
+    const [user, setUser] = useSessionStorageState(`acme-user`, {defaultValue: null});
 
     const logout = () => {
         setUser(null)

@@ -5,7 +5,7 @@ import {Routes, Route} from "react-router-dom";
 import CreateStory from "./CreateStory";
 import Story from "./Story";
 import {SprintContext} from "../SprintContext";
-import {AccessGuard, useAccess} from "cerberus-reactjs";
+import {AccessGuard, useAccess} from "@a11n-io/cerberus-reactjs";
 import {Col, Container, ListGroup, ListGroupItem, Row} from "react-bootstrap";
 
 export default function Stories() {

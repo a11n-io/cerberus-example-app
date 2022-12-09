@@ -4,18 +4,16 @@ import Loader from "../../../uikit/Loader";
 import {Routes, Route, Link} from "react-router-dom";
 import Sprint from "./Sprint";
 import CreateSprint from "./CreateSprint";
-import {AccessGuard} from "cerberus-reactjs";
+import {AccessGuard} from "@a11n-io/cerberus-reactjs";
 import {ProjectContext} from "../ProjectContext";
 
-export default function Sprints(props) {
+export default function Sprints() {
     const projectCtx = useContext(ProjectContext)
-    const {project} = props
 
     return <>
-        <h1>Project: {projectCtx.project.name}</h1>
         <Routes>
             <Route path=":id/*" element={<Sprint/>}/>
-            <Route exact path="/" element={<SprintList project={project}/>}/>
+            <Route path="*" element={<SprintList project={projectCtx.project}/>}/>
         </Routes>
     </>
 }

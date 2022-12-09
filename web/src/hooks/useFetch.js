@@ -1,6 +1,6 @@
 import {useContext, useState} from "react";
 import {AuthContext} from "../context/AuthContext";
-import {CerberusContext} from "cerberus-reactjs";
+import {CerberusContext} from "@a11n-io/cerberus-reactjs";
 
 export default function useFetch(baseUrl) {
     const [loading, setLoading] = useState(false);

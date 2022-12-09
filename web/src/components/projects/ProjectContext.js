@@ -1,9 +1,10 @@
 import {createContext, useState} from "react";
+import useSessionStorageState from 'use-session-storage-state';
 
 const ProjectContext = createContext(null)
 
 function ProjectProvider(props) {
-    const [project, setProject] = useState()
+    const [project, setProject] = useSessionStorageState(`acme-project`, {defaultValue: null});
 
     const value = {
         project: project,

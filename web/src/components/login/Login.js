@@ -6,7 +6,7 @@ import Loader from "../../uikit/Loader";
 import {useContext, useState} from "react";
 import {encode} from "base-64"
 import {AuthContext} from "../../context/AuthContext";
-import {CerberusContext} from "cerberus-reactjs";
+import {CerberusContext} from "@a11n-io/cerberus-reactjs";
 
 export default function Login() {
     const auth = useContext(AuthContext)

@@ -6,8 +6,6 @@ import Navbar from "./components/navbar/Navbar";
 import {ProjectProvider} from "./components/projects/ProjectContext";
 import Home from "./components/home/Home";
 import Projects from "./components/projects/Projects";
-import ProjectMenu from "./components/menu/ProjectMenu";
-import SettingsMenu from "./components/menu/SettingsMenu";
 import Settings from "./components/settings/Settings";
 import {SprintProvider} from "./components/projects/sprints/SprintContext";
 import Sprints from "./components/projects/sprints/Sprints";

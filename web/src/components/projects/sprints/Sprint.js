@@ -5,11 +5,13 @@ import useFetch from "../../../hooks/useFetch";
 import Loader from "../../../uikit/Loader";
 import Btn from "../../../uikit/Btn";
 import Stories from "./stories/Stories";
-import {AccessGuard, Permissions} from "cerberus-reactjs";
+import {AccessGuard, Permissions} from "@a11n-io/cerberus-reactjs";
 import {Card, Tab, Tabs} from "react-bootstrap";
+import {ProjectContext} from "../ProjectContext";
 
 export default function Sprint() {
     const params = useParams()
+    const projectCtx = useContext(ProjectContext)
     const sprintCtx = useContext(SprintContext)
     const {get, loading} = useFetch("/api/")
 
@@ -28,8 +30,9 @@ export default function Sprint() {
     }
 
     return <>
+        <h1>Project: {projectCtx.project.name}</h1>
         <Routes>
-            <Route exact path="/" element={<Dashboard/>}/>
+            <Route path="*" element={<Dashboard/>}/>
         </Routes>
     </>
 }

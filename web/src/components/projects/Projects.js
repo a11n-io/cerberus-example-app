@@ -2,10 +2,10 @@ import {useContext, useEffect, useState} from "react";
 import useFetch from "../../hooks/useFetch";
 import {AuthContext} from "../../context/AuthContext";
 import Loader from "../../uikit/Loader";
-import {Routes, Route, Link} from "react-router-dom";
+import {Routes, Route} from "react-router-dom";
 import Project from "./Project";
 import CreateProject from "./CreateProject";
-import {AccessGuard, useAccess} from "cerberus-reactjs"
+import {AccessGuard, useAccess} from "@a11n-io/cerberus-reactjs"
 import {Col, Container, ListGroup, ListGroupItem, Row} from "react-bootstrap";
 import {ProjectContext} from "./ProjectContext";
 
@@ -14,7 +14,7 @@ export default function Projects() {
     return <>
 
         <Routes>
-            <Route exact path="/" element={<ProjectList/>}/>
+            <Route path="*" element={<ProjectList/>}/>
         </Routes>
 
     </>

@@ -1,9 +1,10 @@
 import {createContext, useState} from "react";
+import useSessionStorageState from 'use-session-storage-state';
 
 const SprintContext = createContext(null)
 
 function SprintProvider(props) {
-    const [sprint, setSprint] = useState()
+    const [sprint, setSprint] = useSessionStorageState(`acme-sprint`, {defaultValue: null});
 
     const value = {
         sprint: sprint,

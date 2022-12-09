@@ -1,10 +1,7 @@
-import {Link, Route, Routes, useNavigate, useParams} from "react-router-dom";
-import {useContext, useEffect} from "react";
 import useFetch from "../../hooks/useFetch";
 import Loader from "../../uikit/Loader";
 import Sprints from "./sprints/Sprints";
-import {ProjectContext} from "./ProjectContext";
-import {AccessGuard, Permissions} from "cerberus-reactjs";
+import {AccessGuard, Permissions} from "@a11n-io/cerberus-reactjs";
 import {Button, Tab, Tabs} from "react-bootstrap";
 
 export default function Project(props) {
@@ -26,7 +23,6 @@ export default function Project(props) {
 
 
 function ProjectDashboard(props) {
-    const projectCtx = useContext(ProjectContext)
     const {del, loading} = useFetch("/api/")
 
     const {project, setSelectedProject, setProjects} = props
